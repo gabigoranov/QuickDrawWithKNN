@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import joblib
-from utils import create_dataset, get_data, draw_image, display_drawing
+from utils import create_dataset, get_data, draw_image, display_vector_drawing
 from sklearn.model_selection import train_test_split
 from preprocessor import Preprocessor
 from knn import KNN
@@ -33,7 +33,6 @@ else:
         "airplane": get_data("airplane.ndjson", 2000),
         "campfire": get_data("campfire.ndjson", 2000),
         "sailboat": get_data("sailboat.ndjson", 2000),
-        "toothbrush": get_data("toothbrush.ndjson", 2000),
         "cactus": get_data("cactus.ndjson", 2000),
         "crown": get_data("crown.ndjson", 2000),
     }
@@ -124,6 +123,13 @@ else:
     model = KNN.from_data(X_train, y_train, 5)
     joblib.dump(model, model_cache_path)
     print("Saved KNN model to cache.")
+
+
+
+# evaluator = Evaluator()
+# y_pred = KNN.from_data(X_train, y_train, k=5).predict_weighted_batch(X_test)
+
+# evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
 
 from app import DrawingApp

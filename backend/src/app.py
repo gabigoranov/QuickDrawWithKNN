@@ -3,10 +3,20 @@ from tkinter import ttk
 import numpy as np
 from PIL import Image, ImageDraw, ImageTk, ImageOps
 import random
+from utils import draw_image
 
 class DrawingApp(tk.Tk):
     def __init__(self, model, preprocessor, categories):
         super().__init__()
+
+        # Set global ttk style to use a light background
+        style = ttk.Style(self)
+        style.theme_use('default')  # Use a modifiable theme
+        style.configure('.', background='#fafafa')
+        style.configure('TLabel', background='#fafafa')
+        style.configure('TFrame', background='#fafafa')
+        style.configure('TButton', background='#fafafa')
+
         self.title("QuickDraw Weighted KNN Classifier")
         self.geometry("850x700")
         self.configure(bg="#fafafa")
@@ -119,22 +129,33 @@ class DrawingApp(tk.Tk):
         self.target_category = random.choice(self.categories)
         self.target_label.config(text=f"Target: {self.target_category}")
 
-    def strokes_to_image(self, size=28):
-        img = Image.new("L", (size, size), color=255)
-        draw = ImageDraw.Draw(img)
-        scale = size / self.canvas_size
+    # def strokes_to_image(self, size=56):
+    #     img = Image.new("L", (size, size), color=255)
+    #     draw = ImageDraw.Draw(img)
+    #     scale = size / self.canvas_size
 
+    #     for stroke in self.strokes:
+    #         if len(stroke) > 1:
+    #             scaled_points = [(x * scale, y * scale) for x, y in stroke]
+    #             draw.line(scaled_points, fill=0, width=2)
+
+    #     return img  # Return PIL Image for preview and processing
+
+    def strokes_to_image(self, size=56):
+        formatted_strokes = []
         for stroke in self.strokes:
             if len(stroke) > 1:
-                scaled_points = [(x * scale, y * scale) for x, y in stroke]
-                draw.line(scaled_points, fill=0, width=2)
+                xs, ys = zip(*stroke)
+                formatted_strokes.append((xs, ys))
 
-        return img  # Return PIL Image for preview and processing
+        image_array = draw_image(strokes=formatted_strokes, size=size)
+        image_array = (image_array * 255).astype(np.uint8)
+        return Image.fromarray(image_array, mode="L")
 
     def _update_processed_image(self, pil_img):
         if pil_img is None:
             # Blank image
-            pil_img = Image.new("L", (28, 28), 255)
+            pil_img = Image.new("L", (56, 56), 255)
         # Resize with NEAREST filter to keep pixelated look
         resized_img = pil_img.resize((200, 200), Image.NEAREST)
         self.photo_image = ImageTk.PhotoImage(resized_img)
@@ -162,6 +183,7 @@ class DrawingApp(tk.Tk):
             pil_img = self.strokes_to_image()
             vec = np.array(pil_img).flatten().reshape(1, -1) / 255.0
             vec_reduced = self.preprocessor.transform(vec)
+            print("preprocessed")
             pred = self.model.predict_weighted(vec_reduced[0])
 
             self.prediction_label.config(text=f"Prediction: {pred}")

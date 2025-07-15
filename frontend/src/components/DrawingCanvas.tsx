@@ -165,8 +165,8 @@ export default function DrawingCanvas({
     <div className="canvas-wrapper">
       <canvas
         ref={canvasRef}
-        width={280}
-        height={280}
+        width={380}
+        height={380}
         className="drawing-canvas"
         onMouseDown={startDrawing}
         onMouseMove={draw}
