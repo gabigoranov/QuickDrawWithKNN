@@ -4,6 +4,7 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 from collections import defaultdict
 from knn import KNN
+from tqdm import tqdm
 
 class Evaluator:
     """
@@ -12,6 +13,7 @@ class Evaluator:
 
     def __init__(self, batch_size=200):
         self.batch_size = batch_size
+
 
     def cross_validate(self, X, y, k_range):
         """
@@ -33,9 +35,11 @@ class Evaluator:
         X_np = X.values if hasattr(X, 'values') else X
         y_np = y.values if hasattr(y, 'values') else y
 
-        for k in k_range:
+        # Outer progress bar over k_range
+        for k in tqdm(k_range, desc="Evaluating k values"):
             fold_accuracies = []
-            for train_idx, val_idx in kf.split(X_np):
+            # Inner progress bar over folds
+            for train_idx, val_idx in tqdm(kf.split(X_np), desc=f"Folds for k={k}", total=kf.get_n_splits(), leave=False):
                 X_train_fold, X_val_fold = X_np[train_idx], X_np[val_idx]
                 y_train_fold, y_val_fold = y_np[train_idx], y_np[val_idx]
 
@@ -58,6 +62,7 @@ class Evaluator:
         best_k = k_range[np.argmax(cv_scores)]
         print(f"Best k from cross-validation: {best_k}")
         return best_k
+
 
 
     def display_confusion_matrix(self, y_true, y_pred, labels, title):

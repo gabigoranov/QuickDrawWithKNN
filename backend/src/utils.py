@@ -23,7 +23,7 @@ def create_dataset(datasets_dict, samples_per_class=1000):
     for label, drawings in datasets_dict.items():
         for item in drawings[:samples_per_class]:
             img = draw_image(item["drawing"], size=56)
-            X.append(img.flatten())  # Flatten 28x28 image to 1D array
+            X.append(img.flatten())  # Flatten image to 1D array
             y.append(label)
     
     return np.array(X), np.array(y)
@@ -123,7 +123,13 @@ def display_vector_drawing(strokes):
     plt.axis('off')
     plt.show()
 
-def display_pixel_drawing(image):    
+def display_pixel_drawing(image): 
+    """
+    Displays a single drawing using Matplotlib.
+
+    Parameters:
+    - image (list): A Matrix of pixels with values ranging from 0 -> 1.
+    """   
     plt.imshow(image, cmap='gray')
     plt.title("Input Drawing")
     plt.axis('off')

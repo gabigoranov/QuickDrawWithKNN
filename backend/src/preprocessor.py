@@ -49,9 +49,7 @@ class Preprocessor:
         """
         if not self.fitted:
             raise RuntimeError("Preprocessor must be fitted before calling transform.")
-        print("gonna scale")
         X_scaled = self.scaler.transform(X)
-        print("scaled")
         return self.pca.transform(X_scaled)
 
     def fit_transform(self, X):

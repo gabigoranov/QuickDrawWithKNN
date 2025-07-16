@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
@@ -8,7 +9,8 @@ import base64
 from PIL import Image
 import io
 import matplotlib.pyplot as plt
-
+from utils import draw_image
+from config import CACHE_DIR
 
 app = FastAPI()
 
@@ -20,11 +22,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-current_file_path = os.path.abspath(__file__)
-CACHE_DIR = os.path.abspath(os.path.join(current_file_path, "..", "..", "cache"))
-os.makedirs(CACHE_DIR, exist_ok=True)
-print("Cache directory:", CACHE_DIR)
 
 model_path = os.path.join(CACHE_DIR, "knn_model.pkl")
 preprocessor_path = os.path.join(CACHE_DIR, "preprocessor.pkl")
@@ -42,24 +39,32 @@ else:
 model = joblib.load(model_path)
 preprocessor = joblib.load(preprocessor_path)
 
-class ImageRequest(BaseModel):
-    image: str  # base64 PNG
+
+# Set this to True during development to see the input image
+SHOW_PREPROCESSED_IMAGE = False
+
+class StrokeRequest(BaseModel):
+    strokes: List[List[List[float]]]
 
 
 @app.post("/predict")
-def predict(req: ImageRequest):
-    image_data = base64.b64decode(req.image.split(',')[1])
-    image = Image.open(io.BytesIO(image_data)).convert('L').resize((28, 28))
-    arr = np.asarray(image).flatten().reshape(1, -1) / 255
+def predict(req: StrokeRequest):
 
-    # Display the image using matplotlib (this will open a window on the server)
-    # plt.imshow(image, cmap='gray')
-    # plt.title("Input Drawing")
-    # plt.axis('off')
-    # plt.show()
+    # 1. Convert strokes to processed 56x56 image using draw_image
+    image = draw_image(req.strokes, size=56)
+    arr = image.flatten().reshape(1, -1)
 
+    # 2. Optionally display the image
+    if SHOW_PREPROCESSED_IMAGE:
+        plt.imshow(image, cmap='gray')
+        plt.title("Preprocessed Input")
+        plt.axis('off')
+        plt.show()
+
+    # 3. Normalize and predict
+    arr = arr / 1.0  # already normalized by draw_image to [0,1]
     processed = preprocessor.transform(arr)
-    prediction = model.predict_weighted(processed, 5)
+    prediction = model.predict_weighted(processed, k=5)
 
     return {"prediction": str(prediction)}
 

@@ -1,33 +1,22 @@
-import { useState, useEffect } from "react";
-import DrawingCanvas from "./components/DrawingCanvas";
+import { useRef, useState, useEffect } from "react";
+import DrawingCanvas, { type DrawingCanvasRef } from "./components/DrawingCanvas";
+import LinearCountdown from "./components/LinearCountdown"; // You should create this
 import "./styles/App.css";
 
 function App() {
+  const canvasRef = useRef<DrawingCanvasRef>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [currentCategory, setCurrentCategory] = useState<string>("");
   const [prediction, setPrediction] = useState<string | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean>(false);
-  const [userHasDrawn, setUserHasDrawn] = useState<boolean>(false);
-
-  const selectRandomCategory = () => {
-    if (categories.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * categories.length);
-    setCurrentCategory(categories[randomIndex]);
-    setIsCorrect(false);
-    setPrediction(null);
-    setUserHasDrawn(false);
-  };
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [userHasDrawn, setUserHasDrawn] = useState(false);
+  const [resetKey, setResetKey] = useState(0); // ⬅ Trigger countdown reset
 
   useEffect(() => {
-    // Fetch categories once on app load
     fetch("http://localhost:8000/categories")
       .then((res) => res.json())
-      .then((data) => {
-        setCategories(data.categories);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch categories:", err);
-      });
+      .then((data) => setCategories(data.categories))
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -36,67 +25,88 @@ function App() {
     }
   }, [categories]);
 
-  const handlePrediction = async (imageDataUrl: string) => {
-    if (!userHasDrawn) return;
+  const selectRandomCategory = () => {
+    const randomIndex = Math.floor(Math.random() * categories.length);
+    setCurrentCategory(categories[randomIndex]);
+    setIsCorrect(false);
+    setPrediction(null);
+    setUserHasDrawn(false);
+    setResetKey((prev) => prev + 1); // 🔄 Reset countdown
+    canvasRef.current?.clearCanvas();
+  };
+
+  const handlePrediction = async () => {
+    if (!userHasDrawn || !canvasRef.current) return;
+    const strokes = canvasRef.current.getStrokes();
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const res = await fetch("http://localhost:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imageDataUrl }),
+        body: JSON.stringify({ strokes }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
       setPrediction(data.prediction);
 
       if (data.prediction === currentCategory) {
         setIsCorrect(true);
       }
     } catch (error) {
-      console.error("Prediction request failed:", error);
+      console.error("Prediction failed:", error);
     }
-  };
-
-  const handleUserDrawnChange = (hasDrawn: boolean) => {
-    setUserHasDrawn(hasDrawn);
-  };
-
-  const handleTryAgain = () => {
-    selectRandomCategory();
   };
 
   return (
     <div className="container">
-      <h1>QuickDraw KNN Classifier</h1>
+      <div className="canvas-container card">
+        <DrawingCanvas
+          ref={canvasRef}
+          isCorrect={isCorrect}
+          userHasDrawn={userHasDrawn}
+          onUserDrawnChange={setUserHasDrawn}
+        />
+      </div>
+      <div className="info-container">
+        <div className="status-container card">
+          {!isCorrect && (
+            <p className="category-prompt">
+              Draw this: <strong>{currentCategory}</strong>
+            </p>
+          )}
 
-      {!isCorrect && currentCategory && (
-        <p className="category-prompt">
-          Draw this: <strong>{currentCategory}</strong>
-        </p>
-      )}
+          {isCorrect && (
+            <div className="congratulations">
+              <h2>🎉 Congratulations! 🎉</h2>
+              <p>
+                You correctly drew a <strong>{currentCategory}</strong>!
+              </p>
+            </div>
+          )}
 
-      {isCorrect && (
-        <div className="congratulations">
-          <h2>🎉 Congratulations! 🎉</h2>
-          <p>
-            You correctly drew a <strong>{currentCategory}</strong>!
-          </p>
-          <button onClick={handleTryAgain}>Try Again</button>
+          {prediction && !isCorrect && (
+            <p className="prediction">
+              Prediction: <strong>{prediction}</strong>
+            </p>
+          )}
         </div>
-      )}
 
-      <DrawingCanvas
-        onPredict={handlePrediction}
-        isCorrect={isCorrect}
-        userHasDrawn={userHasDrawn}
-        onUserDrawnChange={handleUserDrawnChange}
-      />
+        <div className="countdown-container card">
+          <LinearCountdown
+            duration={3}
+            running={userHasDrawn && !isCorrect}
+            onComplete={handlePrediction}
+            resetTrigger={resetKey}
+          />
+        </div>
 
-      {prediction && !isCorrect && (
-        <p className="prediction">
-          Prediction: <strong>{prediction}</strong>
-        </p>
-      )}
+        <div className="actions-controller card">
+          <button onClick={() => canvasRef.current?.clearCanvas()} disabled={isCorrect}>
+            Clear
+          </button>
+          <button onClick={selectRandomCategory}>Try Again</button>
+        </div>
+      </div>
     </div>
   );
 }

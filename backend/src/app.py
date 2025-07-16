@@ -18,7 +18,7 @@ class DrawingApp(tk.Tk):
         style.configure('TButton', background='#fafafa')
 
         self.title("QuickDraw Weighted KNN Classifier")
-        self.geometry("850x700")
+        self.geometry("850x900")
         self.configure(bg="#fafafa")
 
         self.model = model
@@ -129,7 +129,7 @@ class DrawingApp(tk.Tk):
         self.target_category = random.choice(self.categories)
         self.target_label.config(text=f"Target: {self.target_category}")
 
-    # def strokes_to_image(self, size=56):
+    # def strokes_to_image(self, size=56): old
     #     img = Image.new("L", (size, size), color=255)
     #     draw = ImageDraw.Draw(img)
     #     scale = size / self.canvas_size
@@ -142,6 +142,23 @@ class DrawingApp(tk.Tk):
     #     return img  # Return PIL Image for preview and processing
 
     def strokes_to_image(self, size=56):
+        """
+        Converts the user's drawing strokes into a grayscale PIL image, formatted to match
+        the preprocessing used during model training.
+
+        The method transforms the stroke data from the internal Tkinter format into the
+        format expected by the `draw_image` function, which uses matplotlib to render the
+        strokes with anti-aliasing and proportional scaling. The resulting NumPy image array 
+        is converted to a grayscale PIL Image suitable for model prediction or display.
+
+        Parameters:
+            size (int): The width and height (in pixels) of the output square image. 
+                        Defaults to 56.
+
+        Returns:
+            PIL.Image.Image: A grayscale image ("L" mode) of the rendered drawing, 
+                            scaled to the specified size and normalized to 8-bit pixels (0–255).
+        """
         formatted_strokes = []
         for stroke in self.strokes:
             if len(stroke) > 1:
@@ -183,7 +200,6 @@ class DrawingApp(tk.Tk):
             pil_img = self.strokes_to_image()
             vec = np.array(pil_img).flatten().reshape(1, -1) / 255.0
             vec_reduced = self.preprocessor.transform(vec)
-            print("preprocessed")
             pred = self.model.predict_weighted(vec_reduced[0])
 
             self.prediction_label.config(text=f"Prediction: {pred}")

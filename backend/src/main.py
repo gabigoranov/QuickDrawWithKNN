@@ -7,11 +7,8 @@ from sklearn.model_selection import train_test_split
 from preprocessor import Preprocessor
 from knn import KNN
 from evaluation import Evaluator
+from config import CACHE_DIR
 
-current_file_path = os.path.abspath(__file__)
-CACHE_DIR = os.path.abspath(os.path.join(current_file_path, "..", "..", "cache"))
-os.makedirs(CACHE_DIR, exist_ok=True)
-print("Cache directory:", CACHE_DIR)
 
 # ---------------------------
 # Load or cache the raw parsed drawings
@@ -127,9 +124,32 @@ else:
 
 
 # evaluator = Evaluator()
+
+# evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+
 # y_pred = KNN.from_data(X_train, y_train, k=5).predict_weighted_batch(X_test)
 
 # evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+
+# Classification Report:
+#               precision    recall  f1-score   support
+
+#     airplane       0.83      0.86      0.84       390
+#       cactus       0.84      0.74      0.79       407
+#     campfire       0.87      0.79      0.83       401
+#        clock       0.97      0.97      0.97       398
+#        crown       0.91      0.84      0.87       407
+#        house       0.88      0.87      0.87       365
+#       ladder       0.86      0.91      0.89       397
+#    lightning       0.76      0.76      0.76       399
+#     sailboat       0.91      0.94      0.92       398
+#        spoon       0.78      0.95      0.86       406
+#         tree       0.84      0.80      0.82       447
+#     umbrella       0.86      0.85      0.86       385
+
+#     accuracy                           0.86      4800
+#    macro avg       0.86      0.86      0.86      4800
+# weighted avg       0.86      0.86      0.86      4800
 
 
 from app import DrawingApp
