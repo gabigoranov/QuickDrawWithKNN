@@ -20,18 +20,18 @@ if os.path.exists(raw_data_cache_path):
     print("Loaded cached drawing data.")
 else:
     datasets = {
-        "house": get_data("house.ndjson", 2000),
-        "tree": get_data("tree.ndjson", 2000),
-        "clock": get_data("clock.ndjson", 2000),
-        "umbrella": get_data("umbrella.ndjson", 2000),
-        "ladder": get_data("ladder.ndjson", 2000),
-        "lightning": get_data("lightning.ndjson", 2000),
-        "spoon": get_data("spoon.ndjson", 2000),
-        "airplane": get_data("airplane.ndjson", 2000),
-        "campfire": get_data("campfire.ndjson", 2000),
-        "sailboat": get_data("sailboat.ndjson", 2000),
-        "cactus": get_data("cactus.ndjson", 2000),
-        "crown": get_data("crown.ndjson", 2000),
+        "house": get_data("house.ndjson", 4000),
+        "tree": get_data("tree.ndjson", 4000),
+        "clock": get_data("clock.ndjson", 4000),
+        "umbrella": get_data("umbrella.ndjson", 4000),
+        "ladder": get_data("ladder.ndjson", 4000),
+        "lightning": get_data("lightning.ndjson", 4000),
+        "spoon": get_data("spoon.ndjson", 4000),
+        "airplane": get_data("airplane.ndjson", 4000),
+        "campfire": get_data("campfire.ndjson", 4000),
+        "sailboat": get_data("sailboat.ndjson", 4000),
+        "cactus": get_data("cactus.ndjson", 4000),
+        "crown": get_data("crown.ndjson", 4000),
     }
     joblib.dump(datasets, raw_data_cache_path)
     print("Saved drawing data to cache.")
@@ -46,7 +46,7 @@ if os.path.exists(xy_cache_path):
     X, y = data["X"], data["y"]
     print("Loaded cached dataset (X, y).")
 else:
-    X, y = create_dataset(datasets, samples_per_class=2000)
+    X, y = create_dataset(datasets, samples_per_class=4000)
     np.savez_compressed(xy_cache_path, X=X, y=y)
     print("Saved dataset (X, y) to cache.")
 
@@ -123,39 +123,18 @@ else:
 
 
 
-# evaluator = Evaluator()
+evaluator = Evaluator()
 
-# evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-# y_pred = KNN.from_data(X_train, y_train, k=5).predict_weighted_batch(X_test)
+#y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=5000)
 
-# evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+#evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
-# Classification Report:
-#               precision    recall  f1-score   support
+# from app import DrawingApp
 
-#     airplane       0.83      0.86      0.84       390
-#       cactus       0.84      0.74      0.79       407
-#     campfire       0.87      0.79      0.83       401
-#        clock       0.97      0.97      0.97       398
-#        crown       0.91      0.84      0.87       407
-#        house       0.88      0.87      0.87       365
-#       ladder       0.86      0.91      0.89       397
-#    lightning       0.76      0.76      0.76       399
-#     sailboat       0.91      0.94      0.92       398
-#        spoon       0.78      0.95      0.86       406
-#         tree       0.84      0.80      0.82       447
-#     umbrella       0.86      0.85      0.86       385
-
-#     accuracy                           0.86      4800
-#    macro avg       0.86      0.86      0.86      4800
-# weighted avg       0.86      0.86      0.86      4800
-
-
-from app import DrawingApp
-
-model = KNN.from_data(X_train, y_train, 5)
-preprocessor = Preprocessor()
-preprocessor.fit(X)
-app = DrawingApp(model, preprocessor, categories)
-app.mainloop()
+# model = KNN.from_data(X_train, y_train, 5)
+# preprocessor = Preprocessor()
+# preprocessor.fit(X)
+# app = DrawingApp(model, preprocessor, categories)
+# app.mainloop()

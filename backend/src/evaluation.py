@@ -5,16 +5,17 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classifica
 from collections import defaultdict
 from knn import KNN
 from tqdm import tqdm
+from utils import timeit
 
 class Evaluator:
     """
     Evaluator class for performing cross-validation and evaluation of custom weighted KNN.
     """
 
-    def __init__(self, batch_size=200):
+    def __init__(self, batch_size=100):
         self.batch_size = batch_size
 
-
+    @timeit
     def cross_validate(self, X, y, k_range):
         """
         Perform 5-fold cross-validation over a range of k values for weighted KNN.
@@ -43,7 +44,8 @@ class Evaluator:
                 X_train_fold, X_val_fold = X_np[train_idx], X_np[val_idx]
                 y_train_fold, y_val_fold = y_np[train_idx], y_np[val_idx]
 
-                y_pred = model.predict_weighted_batch(X_val_fold, X_train_fold, y_train_fold, k, batch_size=self.batch_size)
+                model.fit(X_train_fold, y_train_fold, k=k)
+                y_pred = model.predict_with_kd_tree_weighted_batch(X_val_fold, k, batch_size=self.batch_size)
                 accuracy = np.mean(y_pred == y_val_fold)
                 fold_accuracies.append(accuracy)
 
@@ -64,7 +66,7 @@ class Evaluator:
         return best_k
 
 
-
+    @timeit
     def display_confusion_matrix(self, y_true, y_pred, labels, title):
         """
         Display a confusion matrix using sklearn's ConfusionMatrixDisplay.
@@ -82,7 +84,7 @@ class Evaluator:
         plt.grid(False)
         plt.show()
 
-
+    @timeit
     def print_classification_report(self, y_true, y_pred):
         """
         Prints the classification report.

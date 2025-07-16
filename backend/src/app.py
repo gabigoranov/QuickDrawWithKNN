@@ -200,7 +200,7 @@ class DrawingApp(tk.Tk):
             pil_img = self.strokes_to_image()
             vec = np.array(pil_img).flatten().reshape(1, -1) / 255.0
             vec_reduced = self.preprocessor.transform(vec)
-            pred = self.model.predict_weighted(vec_reduced[0])
+            pred = self.model.predict_with_kd_tree_weighted(vec_reduced[0])
 
             self.prediction_label.config(text=f"Prediction: {pred}")
             self._update_processed_image(pil_img)
