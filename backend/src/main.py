@@ -9,7 +9,6 @@ from knn import KNN
 from evaluation import Evaluator
 from config import CACHE_DIR
 
-
 # ---------------------------
 # Load or cache the raw parsed drawings
 # ---------------------------
@@ -32,6 +31,14 @@ else:
         "sailboat": get_data("sailboat.ndjson", 4000),
         "cactus": get_data("cactus.ndjson", 4000),
         "crown": get_data("crown.ndjson", 4000),
+        "scissors": get_data("scissors.ndjson", 4000),
+        "fish": get_data("fish.ndjson", 4000),
+        "cat": get_data("cat.ndjson", 4000),
+        "bicycle": get_data("bicycle.ndjson", 4000),
+        "guitar": get_data("guitar.ndjson", 4000),
+        "apple": get_data("apple.ndjson", 4000),
+        "chair": get_data("chair.ndjson", 4000),
+        "sun": get_data("sun.ndjson", 4000),
     }
     joblib.dump(datasets, raw_data_cache_path)
     print("Saved drawing data to cache.")
@@ -125,11 +132,11 @@ else:
 
 evaluator = Evaluator()
 
-evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+# #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-#y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=5000)
+y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=300)
 
-#evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
 # from app import DrawingApp
 
