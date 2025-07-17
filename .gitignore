@@ -1,4 +1,8 @@
 backend/cache/
 backend/data/
+backend/src/__pycache__/
 backend/notebooks/quickdraw_data
 frontend/node_modules/
+
+__pycache__/
+*.pyc
