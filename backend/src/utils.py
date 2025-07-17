@@ -5,6 +5,19 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import os
 
+import time
+from functools import wraps
+
+def timeit(func):
+    @wraps(func)
+    def timed(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"Function '{func.__name__}' took {(end - start):.4f} seconds")
+        return result
+    return timed
+
 def create_dataset(datasets_dict, samples_per_class=1000):
     """
     Converts raw drawing data into flattened image arrays and labels.
