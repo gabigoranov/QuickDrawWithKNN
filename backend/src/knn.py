@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import BallTree
 from utils import timeit
 from sklearn.neighbors import KDTree
+import cupy as cp
+
 
 class KNN:
     """
@@ -119,6 +121,70 @@ class KNN:
 
         return np.array(predictions)
 
+    @timeit
+    def predict_weighted_gpu(self, test_point, k=None, epsilon=1e-5):
+        if k is None:
+            k = self.best_k
+
+        # Convert to CuPy arrays
+        test_point = cp.asarray(test_point)
+        train_data = cp.asarray(self.training_features)  # np -> cp
+        labels = self.training_labels  # stay on CPU
+
+        # Compute distances
+        dists = cp.sqrt(cp.sum((train_data - test_point) ** 2, axis=1))
+
+        # k nearest neighbors
+        knn_indices = cp.asnumpy(cp.argsort(dists)[:k])
+
+        weights = defaultdict(float)
+        for idx in knn_indices:
+            label = labels[idx]
+            weight = 1 / (float(dists[idx].get()) + epsilon)
+            weights[label] += weight
+
+        return max(weights.items(), key=lambda x: x[1])[0]
+    
+    
+    @timeit
+    def predict_weighted_batch_gpu(self, testing_points, X_train=None, y_train=None, k=None, batch_size=100):
+        if X_train is None:
+            X_train = cp.asarray(self.training_features)  # np -> cp
+        else:
+            X_train = cp.asarray(X_train)
+
+        if y_train is None:
+            y_train = self.training_labels  # CPU
+        if k is None:
+            k = self.best_k
+
+        testing_points = cp.asarray(testing_points)  # np -> cp
+        predictions = []
+
+        for start in range(0, len(testing_points), batch_size):
+            end = min(start + batch_size, len(testing_points))
+            X_batch = testing_points[start:end]
+
+            # Euclidean distance on GPU
+            dists = cp.sqrt(cp.sum((X_batch[:, cp.newaxis, :] - X_train[cp.newaxis, :, :]) ** 2, axis=2))
+
+            # Get top k indices
+            knn_indices = cp.asnumpy(cp.argpartition(dists, kth=k, axis=1)[:, :k])
+
+            for i in range(len(X_batch)):
+                neighbor_idxs = knn_indices[i]
+                neighbor_labels = y_train[neighbor_idxs]
+                neighbor_dists = cp.asnumpy(dists[i][neighbor_idxs])
+                weights = 1 / (neighbor_dists + 1e-8)
+
+                votes = defaultdict(float)
+                for lbl, w in zip(neighbor_labels, weights):
+                    votes[lbl] += w
+
+                pred = max(votes.items(), key=lambda x: x[1])[0]
+                predictions.append(pred)
+
+        return np.array(predictions)
     
     @timeit
     def predict_with_ball_tree_weighted(self, test_point: np.ndarray, k=None, epsilon=1e-5):
