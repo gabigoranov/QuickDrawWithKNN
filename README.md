@@ -161,6 +161,7 @@ text
 │       ├── main.py                    # 🔧 Entry point for running the backend service
 │       ├── preprocessor.py            # 🔄 PCA transformation and scaling logic
 │       ├── utils.py                   # 🛠️ Helper functions for loading, drawing, and data processing
+|       ├── config.py                  # ⚙️ Configuration file containing common directory paths and etc.
 
 ├── frontend/                          # 🎨 Frontend client built with React + TypeScript
 │   ├── node_modules/                  # 📦 Installed NPM packages
@@ -176,7 +177,7 @@ text
 │   ├── Other config files             # ⚙️ Vite, TypeScript, and package configuration
 
 ├── .gitignore                         # 🙈 Git ignored files and directories
-├── README.md                          # 📘 Project documentation
+├── README.md                          # 📘 Project README
 
 ```
 

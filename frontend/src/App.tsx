@@ -18,6 +18,8 @@ function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [countdownRunning, setCountdownRunning] = useState(false);
+  const [recentCategories, setRecentCategories] = useState<string[]>([]);
+  const [timeRanOut, setTimeRanOut] = useState(false);
 
   // Fetch categories once
   useEffect(() => {
@@ -35,11 +37,17 @@ function App() {
     // eslint-disable-next-line
   }, [categories]);
 
-  // Select prompt and reset UI
   function selectRandomCategory() {
+    setTimeRanOut(false);
     if (!categories.length) return;
-    const randomIndex = Math.floor(Math.random() * categories.length);
-    setCurrentCategory(categories[randomIndex]);
+
+    const available = categories.filter(cat => !recentCategories.includes(cat));
+    const pool = available.length > 0 ? available : categories; // fallback if all have been used
+
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const newCategory = pool[randomIndex];
+
+    setCurrentCategory(newCategory);
     setIsCorrect(false);
     setPrediction(null);
     setUserHasDrawn(false);
@@ -47,7 +55,13 @@ function App() {
     setResetKey((k) => k + 1);
     setCountdownRunning(false);
     canvasRef.current?.clearCanvas();
+
+    setRecentCategories(prev => {
+      const updated = [...prev, newCategory];
+      return updated.length > 15 ? updated.slice(updated.length - 15) : updated;
+    });
   }
+
 
   // Start countdown only after user has drawn something
   useEffect(() => {
@@ -93,12 +107,6 @@ function App() {
 
   function handleClear() {
     canvasRef.current?.clearCanvas();
-    setPrediction(null);
-    setIsCorrect(false);
-    setUserHasDrawn(false);
-    setShowPopup(false);
-    setCountdownRunning(false);
-    setResetKey((k) => k + 1);
   }
 
   return (
@@ -120,7 +128,11 @@ function App() {
 
           <Countdown
             duration={30}
-            onComplete={selectRandomCategory}
+            onComplete={() => {
+              if (!isCorrect) {
+                setTimeRanOut(true);
+              }
+            }}
             running={countdownRunning && !isCorrect}
             resetTrigger={resetKey}
           />
@@ -147,18 +159,34 @@ function App() {
         </div>
       </main>
       {showPopup && (
-          <div className="popup" role="dialog" aria-live="assertive" aria-modal="true">
-            <div className="popup-content">
-              🎉 Congratulations! 🎉
-              <br />
-              You correctly drew a <b>{currentCategory}</b>!
-              <br />
-              <button onClick={selectRandomCategory} autoFocus>
-                Try another
-              </button>
-            </div>
+        <div className="popup" role="dialog" aria-live="assertive" aria-modal="true">
+          <div className="popup-content">
+            🎉 Congratulations! 🎉
+            <br />
+            You correctly drew a <b>{currentCategory}</b>!
+            <br />
+            <button onClick={selectRandomCategory} autoFocus>
+              Try another
+            </button>
           </div>
-        )}
+        </div>
+      )}
+
+      {timeRanOut && (
+        <div className="popup" role="dialog" aria-live="assertive" aria-modal="true">
+          <div className="popup-content">
+            🥲 Oh noooo le policia! 🥲
+            <br />
+            You didn't draw a <b>{currentCategory}</b> in time!
+            <br />
+            <button onClick={() => {
+                selectRandomCategory();
+              }} autoFocus>
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

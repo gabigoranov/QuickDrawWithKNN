@@ -33,6 +33,9 @@ class DrawingApp(tk.Tk):
 
         self.target_category = None
 
+        self.recent_targets = []
+        self.recent_limit = 15  # how many past categories to avoid
+
         self._build_ui()
         self.new_target()
 
@@ -126,8 +129,23 @@ class DrawingApp(tk.Tk):
         self.new_target()
 
     def new_target(self):
-        self.target_category = random.choice(self.categories)
+        # Filter out recently used categories
+        available_categories = [cat for cat in self.categories if cat not in self.recent_targets]
+        
+        # If all categories have been recently used, reset memory
+        if not available_categories:
+            self.recent_targets = []
+            available_categories = self.categories[:]
+
+        self.target_category = random.choice(available_categories)
+
+        # Update recent_targets list
+        self.recent_targets.append(self.target_category)
+        if len(self.recent_targets) > self.recent_limit:
+            self.recent_targets.pop(0)
+
         self.target_label.config(text=f"Target: {self.target_category}")
+
 
     # def strokes_to_image(self, size=56): old
     #     img = Image.new("L", (size, size), color=255)

@@ -39,6 +39,16 @@ else:
         "apple": get_data("apple.ndjson", 4000),
         "chair": get_data("chair.ndjson", 4000),
         "sun": get_data("sun.ndjson", 4000),
+        "moon": get_data("moon.ndjson", 4000),
+        "ice cream": get_data("ice cream.ndjson", 4000),
+        "snail": get_data("snail.ndjson", 4000),
+        "mug": get_data("mug.ndjson", 4000),
+        "key": get_data("key.ndjson", 4000),
+        "bowtie": get_data("bowtie.ndjson", 4000),
+        "bucket": get_data("bucket.ndjson", 4000),
+        "axe": get_data("axe.ndjson", 4000),
+        "boomerang": get_data("boomerang.ndjson", 4000),
+        "hot air balloon": get_data("hot air balloon.ndjson", 4000),
     }
     joblib.dump(datasets, raw_data_cache_path)
     print("Saved drawing data to cache.")
@@ -134,7 +144,7 @@ else:
 
 # # #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-# y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=300)
+# y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_ball_tree_weighted_batch(X_test, batch_size=100)
 
 # evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
