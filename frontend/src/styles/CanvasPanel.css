@@ -1,0 +1,31 @@
+/* Left canvas panel fills available space */
+.canvas-panel {
+  background: var(--canvas-bg);
+  border-radius: 1.5rem;
+  box-shadow: 0 0 16px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* fill grid row height */
+  width: 100%; /* fill grid column width */
+  user-select: none;
+
+  position: relative;
+}
+
+/* Canvas fills entire panel area, no forced shape */
+.drawing-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 1.5rem;
+  background-color: var(--canvas-bg);
+  cursor: crosshair;
+  box-shadow: 0 2px 12px var(--shadow-color);
+  touch-action: none;
+}
+@media (max-width: 900px) {
+  .drawing-canvas {
+    height: 100%;
+  }
+}

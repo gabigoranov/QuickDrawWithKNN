@@ -130,18 +130,18 @@ else:
 
 
 
-evaluator = Evaluator()
+# evaluator = Evaluator()
 
-# #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+# # #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=300)
+# y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=300)
 
-evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+# evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
-# from app import DrawingApp
+from app import DrawingApp
 
-# model = KNN.from_data(X_train, y_train, 5)
-# preprocessor = Preprocessor()
-# preprocessor.fit(X)
-# app = DrawingApp(model, preprocessor, categories)
-# app.mainloop()
+model = KNN.from_data(X_train, y_train, 5)
+preprocessor = Preprocessor()
+preprocessor.fit(X)
+app = DrawingApp(model, preprocessor, categories)
+app.mainloop()

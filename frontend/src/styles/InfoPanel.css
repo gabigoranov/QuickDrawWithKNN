@@ -1,0 +1,246 @@
+.info-panel {
+  background: var(--panel-bg);
+  color: var(--text);
+  border-left: 6px solid var(--border);
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  overflow-y: auto; /* scroll only here */
+  box-sizing: border-box;
+  position: sticky;
+  top: 1rem;
+  scroll-behavior: smooth;
+  box-shadow: inset 0 0 12px var(--shadow-color);
+}
+
+@media (max-width: 900px) {
+  .info-panel {
+    border-left: none;
+    border-top: 6px solid var(--border);
+    height: auto;
+    max-height: none;
+    position: relative;
+    margin-top: 1rem;
+  }
+}
+
+.info-content {
+  display: flex;
+  flex-flow: column;
+  gap: 0.5rem;
+}
+
+/* Container cards around info slices */
+.info-container {
+  background: var(--canvas-bg);
+  border-radius: 1rem;
+  box-shadow: 0 6px 25px var(--shadow-color);
+  padding: 0.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Animate fade in from below */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-prompt {
+  color: var(--surface);
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: 0.03em;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 0;
+
+  background: none;
+  box-shadow: none;
+}
+
+/* Predict container with accent left bar */
+.prediction {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--bright-accent);
+  border-left: 6px solid var(--accent);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  background: rgba(102, 206, 214, 0.12);
+  text-align: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Buttons container */
+.actions {
+  position: absolute;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  width: auto;
+  align-items: stretch;
+  justify-content: center;;
+}
+
+/* Buttons */
+.clear-btn,
+.tryagain-btn {
+  padding: 0.85rem 1.8rem;
+  font-size: 1.15rem;
+  color: var(--text);
+  border-radius: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -3px 0 #5da7b5,
+    0 3px 8px var(--shadow-color);
+  background: linear-gradient(135deg, var(--accent), var(--bright-accent));
+  transition: background 0.3s ease;
+  user-select: none;
+}
+
+.clear-btn:disabled {
+  background: #ddd;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.clear-btn:hover:not(:disabled),
+.tryagain-btn:hover {
+  background: linear-gradient(135deg, var(--bright-accent), var(--accent));
+  box-shadow:
+    inset 0 -3px 0 #4599a0,
+    0 4px 12px var(--shadow-color);
+}
+
+.animated-popup {
+  animation: popupFadeIn 0.3s ease forwards;
+}
+
+/* Popup overlay */
+.popup {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(34, 37, 59, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 2000;
+  animation: popupFadeIn 0.3s ease forwards;
+}
+
+/* Popup card */
+.popup-content {
+  background: var(--canvas-bg);
+  color: var(--text);
+  border-radius: 1.5rem;
+  padding: 3rem 3.5rem;
+  text-align: center;
+  box-shadow: 0 8px 40px var(--shadow-color);
+  font-size: 1.7rem;
+  font-weight: 900;
+  max-width: 420px;
+  user-select: none;
+  position: relative;
+  animation: zoomIn 0.4s ease forwards;
+}
+
+.popup-content button {
+  margin-top: 2rem;
+  background: var(--accent);
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.2rem;
+  user-select: none;
+  box-shadow: 0 5px 20px var(--shadow-color);
+  transition: background 0.3s ease;
+}
+
+.popup-content button:hover {
+  background: #49a6a9;
+}
+
+@keyframes popupFadeIn {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.category-prompt-container{
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;
+  position: absolute;
+  top: 1rem;
+}
+
+/* Countdown timer with prominent styling */
+.countdown-timer {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(----text-light);
+  user-select: none;
+  text-align: center;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.07);
+  background: var(--panel-bg);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-value {
+  color: white;
+  font-family: 'Consolas', monospace;
+  font-weight: 700;
+  height: auto;
+}
+
+b {
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .actions {
+    width: 100%;
+  }
+}

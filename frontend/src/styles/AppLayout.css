@@ -1,0 +1,58 @@
+:root {
+  --background: #f5f7fa;
+  --panel-bg: #a7a5c6;
+  --canvas-bg: #fff;
+  --surface: #5d707f;
+  --text: #232531;
+  --text-light: #f8f8fc;
+  --accent: #66ced6;
+  --border: #8797b2;
+  --bright-accent: #7bdddb;
+  --shadow-color: rgba(34, 37, 59, 0.15);
+
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Body and root container */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  width: 100vw;
+  height: 100vh;
+}
+
+.app-layout {
+  gap: 1rem;
+  padding: 1rem;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.show-mobile{
+  display: none;;
+}
+
+/* Mobile: stacked layout */
+@media (max-width: 900px) {
+  .hide-mobile {
+    display: none;
+  }
+
+  .show-mobile{
+    display: inline-block;
+  }
+
+  .app-layout {
+    height: 100%;
+    padding: 0.5rem;
+  }
+}
