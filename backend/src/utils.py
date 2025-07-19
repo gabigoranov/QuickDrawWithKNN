@@ -33,12 +33,12 @@ def create_dataset(datasets_dict, samples_per_class=1000):
     X = []
     y = []
     
-    for label, drawings in datasets_dict.items():
+    for i, (label, drawings) in enumerate(datasets_dict.items()):
         for item in drawings[:samples_per_class]:
             img = draw_image(item["drawing"], size=56)
             X.append(img.flatten())  # Flatten image to 1D array
             y.append(label)
-    
+        print(f"Done with dataset #{i+1}")
     return np.array(X), np.array(y)
 
 def get_data(filename, max_items):

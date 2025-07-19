@@ -320,16 +320,28 @@ class KNN:
 
 
 
-    def fit(self, features, labels, k=3):
+    def fit(self, features, labels, k=3, metric="euclidean"):
         """
-        Stores the training data for the KNN classifier.
+        Stores the training data and builds internal search structures (BallTree/KDTree) 
+        for the KNN classifier.
 
         Parameters:
-        - features (array-like): A 2D array of shape (n_samples, n_features) representing the training data.
-        - labels (array-like): A 1D array of shape (n_samples,) representing class labels for each training sample.
+        - features (array-like): A 2D array of shape (n_samples, n_features) representing 
+                                the training feature vectors.
+        - labels (array-like): A 1D array of shape (n_samples,) representing class labels.
+        - k (int, optional): Number of neighbors to consider (default: 3).
+        - metric (str, optional): Distance metric to use. Supported values for BallTree include:
+            - 'euclidean' (L2)
+            - 'manhattan' (L1)
+            - 'chebyshev'
+            - 'minkowski'
+            - 'hamming'
+            - 'cosine'
+            - etc.
+        Note: KDTree only supports 'euclidean'.
 
         Raises:
-        - ValueError: If the input arrays are not compatible in length or shape.
+        - ValueError: If inputs are invalid or mismatched in shape.
         """
         if features is None or labels is None:
             raise ValueError("Features and labels must not be None.")
@@ -344,19 +356,109 @@ class KNN:
             raise ValueError("Labels must be a 1D array of shape (n_samples,).")
 
         if features.shape[0] != labels.shape[0]:
-            raise ValueError(f"Number of feature vectors ({features.shape[0]}) does not match number of labels ({labels.shape[0]}).")
+            raise ValueError(f"Number of feature vectors ({features.shape[0]}) "
+                            f"does not match number of labels ({labels.shape[0]}).")
 
         self.training_features = features
         self.training_labels = labels
         self.best_k = k
 
-        # Build the Ball Tree with training features
-        self.ball_tree = BallTree(self.training_features)
+        # Create BallTree with chosen metric
+        self.ball_tree = BallTree(self.training_features, metric=metric)
 
-        self.kd_tree = KDTree(self.training_features)
+        # Only build KDTree if metric is 'euclidean'
+        if metric == "euclidean":
+            self.kd_tree = KDTree(self.training_features)
+        else:
+            self.kd_tree = None
+
+
+    @timeit
+    def predict_weighted_manhattan(self, test_point, k=None, epsilon=1e-5):
+        """
+        Predicts the label for a single test point using weighted KNN with Manhattan distance.
+
+        Manhattan distance is the sum of absolute differences across features, 
+        which can be more effective in high-dimensional, sparse data like QuickDraw.
+
+        Parameters:
+        - test_point (np.ndarray): The input feature vector to classify.
+        - k (int, optional): The number of neighbors to consider. Defaults to self.best_k.
+        - epsilon (float): A small constant to avoid division by zero in weight calculation.
+
+        Returns:
+        - Predicted label based on weighted majority voting.
+        """
+        if k is None:
+            k = self.best_k
+
+        # Compute Manhattan (L1) distances
+        dists = np.sum(np.abs(self.training_features - test_point), axis=1)
+        knn_indices = np.argsort(dists)[:k]
+
+        weights = defaultdict(float)
+        for idx in knn_indices:
+            label = self.training_labels[idx]
+            weight = 1 / (dists[idx] + epsilon)
+            weights[label] += weight
+
+        return max(weights.items(), key=lambda x: x[1])[0]
+    
+    @timeit
+    def predict_weighted_batch_manhattan(self, testing_points, X_train=None, y_train=None, k=None, batch_size=100):
+        """
+        Predicts labels for a batch of test points using weighted KNN with Manhattan distance.
+
+        For each test point, the method computes Manhattan distances to all training points,
+        finds the `k` closest neighbors, and performs weighted voting based on the inverse
+        of distances to determine the predicted label.
+
+        Parameters:
+        - testing_points (np.ndarray): A 2D array of shape (n_samples, n_features) containing test data.
+        - X_train (np.ndarray, optional): Training feature vectors. Defaults to self.training_features.
+        - y_train (np.ndarray, optional): Training labels. Defaults to self.training_labels.
+        - k (int, optional): Number of neighbors to use. Defaults to self.best_k.
+        - batch_size (int): Number of test points to process per batch to manage memory usage.
+
+        Returns:
+        - np.ndarray: Predicted labels for each test point in the input array.
+        """
+        if X_train is None:
+            X_train = self.training_features
+        if y_train is None:
+            y_train = self.training_labels
+        if k is None:
+            k = self.best_k
+
+        predictions = []
+
+        for start in range(0, len(testing_points), batch_size):
+            end = min(start + batch_size, len(testing_points))
+            X_batch = testing_points[start:end]
+
+            # Compute Manhattan distances between test batch and training points
+            dists = np.sum(np.abs(X_batch[:, np.newaxis, :] - X_train[np.newaxis, :, :]), axis=2)
+
+            # Get indices of the k nearest neighbors for each test point
+            knn_indices = np.argpartition(dists, kth=k, axis=1)[:, :k]
+
+            for i in range(len(X_batch)):
+                neighbor_idxs = knn_indices[i]
+                neighbor_labels = y_train[neighbor_idxs]
+                neighbor_dists = dists[i][neighbor_idxs]
+                weights = 1 / (neighbor_dists + 1e-8)
+
+                votes = defaultdict(float)
+                for lbl, w in zip(neighbor_labels, weights):
+                    votes[lbl] += w
+
+                pred = max(votes.items(), key=lambda x: x[1])[0]
+                predictions.append(pred)
+
+        return np.array(predictions)
 
     @classmethod
-    def from_data(cls, features, labels, k=3):
+    def from_data(cls, features, labels, k=3, metric="euclidean"):
         """
         Factory method to create and fit a KNN instance.
 
@@ -369,6 +471,6 @@ class KNN:
         - KNN: A fitted KNN instance.
         """
         instance = cls(best_k=k)
-        instance.fit(features, labels, k=k)
+        instance.fit(features, labels, k=k, metric=metric)
         return instance
 

@@ -3,10 +3,12 @@ import DrawingCanvas, { type DrawingCanvasRef } from "./components/DrawingCanvas
 import "./styles/AppLayout.css";
 import "./styles/CanvasPanel.css";
 import "./styles/InfoPanel.css";
+import "./styles/HamburgerMenu.css";
 import Countdown from "./components/Countdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from '@fortawesome/free-solid-svg-icons'; 
 import { faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons'; 
+import HamburgerMenu from "./components/HamburgerMenu";
 
 function App() {
   const canvasRef = useRef<DrawingCanvasRef>(null);
@@ -20,6 +22,10 @@ function App() {
   const [countdownRunning, setCountdownRunning] = useState(false);
   const [recentCategories, setRecentCategories] = useState<string[]>([]);
   const [timeRanOut, setTimeRanOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const effectiveCountdownRunning = countdownRunning && !menuOpen && !isCorrect;
 
   // Fetch categories once
   useEffect(() => {
@@ -39,11 +45,11 @@ function App() {
 
   function selectRandomCategory() {
     setTimeRanOut(false);
-    if (!categories.length) return;
+    const source = selectedCategories.length ? selectedCategories : categories;
+    if (!source.length) return;
 
-    const available = categories.filter(cat => !recentCategories.includes(cat));
-    const pool = available.length > 0 ? available : categories; // fallback if all have been used
-
+    const available = source.filter(cat => !recentCategories.includes(cat));
+    const pool = available.length > 0 ? available : source;
     const randomIndex = Math.floor(Math.random() * pool.length);
     const newCategory = pool[randomIndex];
 
@@ -63,6 +69,7 @@ function App() {
   }
 
 
+
   // Start countdown only after user has drawn something
   useEffect(() => {
     if (userHasDrawn && !isCorrect) {
@@ -74,15 +81,15 @@ function App() {
 
   // Poll prediction every 3 seconds only if userHasDrawn & !isCorrect
   useEffect(() => {
-    if (!userHasDrawn || isCorrect) return;
+    if (!effectiveCountdownRunning || !userHasDrawn) return;
 
     const interval = setInterval(() => {
       pollPrediction();
     }, 3000);
 
     return () => clearInterval(interval);
-    // eslint-disable-next-line
-  }, [userHasDrawn, isCorrect, currentCategory]);
+  }, [effectiveCountdownRunning, userHasDrawn, currentCategory]);
+
 
   async function pollPrediction() {
     if (!userHasDrawn || !canvasRef.current) return;
@@ -112,6 +119,14 @@ function App() {
   return (
     <div className="app-layout">
       <main className="canvas-panel" aria-label="Drawing Canvas Area">
+        <HamburgerMenu
+          categories={categories}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+          isOpen={menuOpen}
+          setIsOpen={setMenuOpen}
+        />
+
         <DrawingCanvas
           ref={canvasRef}
           isCorrect={isCorrect}
@@ -129,13 +144,12 @@ function App() {
           <Countdown
             duration={30}
             onComplete={() => {
-              if (!isCorrect) {
-                setTimeRanOut(true);
-              }
+              if (!isCorrect) setTimeRanOut(true);
             }}
-            running={countdownRunning && !isCorrect}
+            running={effectiveCountdownRunning}
             resetTrigger={resetKey}
           />
+
         </div>
 
         <div className="actions">

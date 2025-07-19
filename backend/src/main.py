@@ -49,6 +49,16 @@ else:
         "axe": get_data("axe.ndjson", 4000),
         "boomerang": get_data("boomerang.ndjson", 4000),
         "hot air balloon": get_data("hot air balloon.ndjson", 4000),
+        "suitcase": get_data("suitcase.ndjson", 4000),
+        "snake": get_data("snake.ndjson", 4000),
+        "saw": get_data("saw.ndjson", 4000),
+        "stairs": get_data("stairs.ndjson", 4000),
+        "grass": get_data("grass.ndjson", 4000),
+        "envelope": get_data("envelope.ndjson", 4000),
+        "dumbbell": get_data("dumbbell.ndjson", 4000),
+        "carrot": get_data("carrot.ndjson", 4000),
+        "cloud": get_data("cloud.ndjson", 4000),
+        "basketball": get_data("basketball.ndjson", 4000),
     }
     joblib.dump(datasets, raw_data_cache_path)
     print("Saved drawing data to cache.")
@@ -134,24 +144,24 @@ if os.path.exists(model_cache_path):
     model = joblib.load(model_cache_path)
     print("Loaded cached KNN model.")
 else:
-    model = KNN.from_data(X_train, y_train, 5)
+    model = KNN.from_data(X_train, y_train, 5, metric="euclidean")
     joblib.dump(model, model_cache_path)
     print("Saved KNN model to cache.")
 
 
 
-# evaluator = Evaluator()
+evaluator = Evaluator()
 
-# # #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+#evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-# y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_ball_tree_weighted_batch(X_test, batch_size=100)
+y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=100)
 
-# evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
-from app import DrawingApp
+# from app import DrawingApp
 
-model = KNN.from_data(X_train, y_train, 5)
-preprocessor = Preprocessor()
-preprocessor.fit(X)
-app = DrawingApp(model, preprocessor, categories)
-app.mainloop()
+# model = KNN.from_data(X_train, y_train, 5)
+# preprocessor = Preprocessor()
+# preprocessor.fit(X)
+# app = DrawingApp(model, preprocessor, categories)
+# app.mainloop()
