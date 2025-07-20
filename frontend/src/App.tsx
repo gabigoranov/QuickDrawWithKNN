@@ -17,6 +17,11 @@ import { NotificationProvider, useNotifications } from './components/Notificatio
 // Import your custom hook for fetching categories
 import { useCategoriesWithRetry } from './hooks/useCategoriesWithRetry'; // Adjust path if needed
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Settings from "./pages/Settings";
+import SettingsButton from "./components/SettingsButton";
+
+
 // Helper component to manage category loading notifications
 function CategoriesLoader({ setCategoriesFromHook }: { setCategoriesFromHook: (cats: string[]) => void }) {
   const { categories, status, retryCountdown } = useCategoriesWithRetry("http://localhost:8000/categories", 5);
@@ -243,8 +248,8 @@ function AppContent() { // Renamed App to AppContent and wrapped by Notification
             isOpen={menuOpen}
             setIsOpen={setMenuOpen}
           />
-          <div className="centered-items">
-            <h1 className="category-prompt info-container">
+          <div className="centered-items" style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <h1 className="category-prompt info-container" style={{ margin: 0 }}>
               {!isCorrect && <><span className="hide-mobile">Draw this: </span><b>{currentCategory}</b></>}
             </h1>
 
@@ -256,7 +261,11 @@ function AppContent() { // Renamed App to AppContent and wrapped by Notification
               running={effectiveCountdownRunning}
               resetTrigger={resetKey}
             />
+
+
           </div>
+
+          <SettingsButton />
         </div>
 
         <div className="actions">
@@ -329,11 +338,15 @@ function AppContent() { // Renamed App to AppContent and wrapped by Notification
   );
 }
 
-// Main App component that wraps the content with the NotificationProvider
 export default function App() {
   return (
     <NotificationProvider>
-      <AppContent />
+      <Router>
+        <Routes>
+          <Route path="/" element={<AppContent />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </Router>
     </NotificationProvider>
   );
 }

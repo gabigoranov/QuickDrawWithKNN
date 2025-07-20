@@ -1,5 +1,17 @@
+.toast-notification-container {
+  position: fixed;
+  top: 6rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between stacked notifications */
+  max-width: 320px; /* Limit width */
+}
+
 .toast-notification {
   max-width: 300px;
+  min-width: 200px;
   background: var(--panel-bg);
   color: var(--text-light);
   padding: 1rem 1.25rem;
@@ -7,20 +19,31 @@
   box-shadow: 0 4px 12px rgba(34, 37, 59, 0.3);
   font-weight: 600;
   font-size: 1rem;
-  opacity: 0;
-  transform: translateX(100%);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  z-index: 9999;
+  font-family: Arial, sans-serif;
+  user-select: none;
   display: flex;
   flex-direction: column;
-  user-select: none;
   gap: 0.2rem;
+
+  opacity: 0;
+  transform: translateX(100%);
+
+  transition: opacity 0.3s ease, transform 0.3s ease; /* Use transitions */
+  z-index: 9999;
 }
 
-/* Slide in */
+/* Visible state */
 .toast-notification.show {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* Slide in animation */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Progress bar at bottom */
@@ -28,10 +51,12 @@
   height: 4px;
   background: var(--bright-accent);
   border-radius: 3px;
-  width: 100%; /* will be overridden inline */
+  width: 100%; /* overridden inline */
   transition: width 0.1s linear;
+  margin-top: 8px;
 }
 
+/* Buttons inside toast */
 .toast-extra button {
   background-color: var(--accent);
   color: var(--text-light);
@@ -51,49 +76,6 @@
   outline: none;
 }
 
-/* Add this to your ToastNotification.css */
-.toast-notification-container {
-  position: fixed;
-  top: 6rem;
-  right: 2rem;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px; /* Space between stacked notifications */
-  max-width: 320px; /* Limit width */
-}
-
-.toast-notification {
-  background: var(--panel-bg);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  user-select: none;
-  min-width: 200px; /* Minimum width for toasts */
-  opacity: 0; /* Start hidden */
-  transform: translateX(100%); /* Start off-screen to the right */
-  animation: slideIn 0.3s forwards; /* Animation for sliding in */
-}
-
-/* Animation for sliding in */
-@keyframes slideIn {
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Style for the progress bar */
-.toast-progress {
-  height: 3px;
-  background-color: var(--accent);
-  margin-top: 8px;
-  border-radius: 1.5px;
-}
-
 .toast-message {
   font-weight: bold;
 }
@@ -104,6 +86,7 @@
   margin-top: 5px;
 }
 
+/* Shrinking width animation for progress bar */
 @keyframes shrink-width {
   from {
     width: 100%;
@@ -113,9 +96,10 @@
   }
 }
 
+/* Responsive: move container on small screens */
 @media (max-width: 900px) {
-    .toast-notification{
-        top: auto;
-        bottom: 4rem;
-    }
+  .toast-notification-container {
+    top: auto;
+    bottom: 4rem;
+  }
 }

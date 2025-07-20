@@ -1,0 +1,114 @@
+/* Reset and base */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* prevent scrollbars */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--panel-bg);
+  color: var(--text-light);
+}
+
+/* Main container full screen with flex */
+.settings-fullscreen {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Sidebar styling */
+.settings-sidebar {
+  width: 230px;
+  background: var(--panel-bg);
+  border-right: 2px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  box-shadow: inset -8px 0 15px -8px var(--shadow-color);
+}
+
+/* Sidebar title */
+.sidebar-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin: 0 0 2rem 0;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-align: center;
+  background: linear-gradient(90deg, var(--bright-accent), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Tabs list reset */
+.sidebar-tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+}
+
+/* Individual tab buttons */
+.sidebar-tab {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.sidebar-tab:hover,
+.sidebar-tab:focus-visible {
+  background-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 10px var(--bright-accent);
+  color: white;
+}
+
+.sidebar-tab.active {
+  background-color: var(--bright-accent);
+  box-shadow: 0 0 15px var(--bright-accent);
+  color: white;
+  cursor: default;
+  font-weight: 700;
+}
+
+/* Content area */
+.settings-content {
+  flex-grow: 1;
+  background: white;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  color: var(--text-dark, #222);
+  font-weight: 500;
+  border-radius: 0;
+  -webkit-overflow-scrolling: touch;
+  /* optional scrollbar customization */
+  scrollbar-width: thin;
+  scrollbar-color: var(--bright-accent) transparent;
+}
+
+.settings-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background-color: var(--bright-accent);
+  border-radius: 8px;
+}
+
+/* Scrollbar handles vertical scrolling only */

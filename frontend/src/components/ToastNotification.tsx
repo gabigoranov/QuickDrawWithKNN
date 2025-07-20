@@ -1,63 +1,42 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from 'react';
 
 interface ToastNotificationProps {
   message: string;
-  duration?: number; // ms, omit for persistent
-  onClose: () => void;
-  children?: React.ReactNode; // Add children type
+  duration?: number;
+  onClose?: () => void;
+  children?: React.ReactNode;
 }
 
-export default function ToastNotification({
+const ToastNotification: React.FC<ToastNotificationProps> = ({
   message,
   duration,
   onClose,
   children,
-}: ToastNotificationProps) {
-  const [, setTimeLeft] = useState(duration || 0);
-  const startTimeRef = useRef<number | null>(null);
-  const animationFrame = useRef<number | null>(null);
+}) => {
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (duration === undefined) { // If no duration, it's a persistent toast, no timer needed
-      setTimeLeft(0); // Explicitly set to 0 as no progress bar needed
-      if (animationFrame.current !== null) {
-        cancelAnimationFrame(animationFrame.current);
-        animationFrame.current = null;
-      }
-      return;
-    }
-
-    setTimeLeft(duration);
-    startTimeRef.current = null;
-
-    function update(timestamp: number) {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const elapsed = timestamp - startTimeRef.current;
-      const remaining = Math.max(duration! - elapsed, 0);
-      setTimeLeft(remaining);
-
-      if (remaining > 0) {
-        animationFrame.current = requestAnimationFrame(update);
-      } else {
-        onClose();
-      }
-    }
-
-    animationFrame.current = requestAnimationFrame(update);
+    const enterTimeout: number = window.setTimeout(() => setVisible(true), 10);
+    const exitTimeout: number = window.setTimeout(() => setVisible(false), duration);
+    const removeTimeout: number = window.setTimeout(() => { if (onClose) onClose(); }, duration! + 300);
 
     return () => {
-      if (animationFrame.current !== null) {
-        cancelAnimationFrame(animationFrame.current);
-      }
+        window.clearTimeout(enterTimeout);
+        window.clearTimeout(exitTimeout);
+        window.clearTimeout(removeTimeout);
     };
-  }, [message, duration, onClose]); // reset timer if message or duration changes
+    }, [duration, onClose]);
+
+
+  // When visible is false, applies styles for hidden/offscreen
+  // When true, applies `.show` styles (slide in)
 
   return (
-    <div className="toast-notification show" role="alert" aria-live="assertive">
-      <div className="toast-message">
-        {message}
-      </div>
-      {children} {/* Render children here if present */}
+    <div className={`toast-notification${visible ? ' show' : ''}`}>
+      <div className="toast-message">{message}</div>
+      {children}
     </div>
   );
-}
+};
+
+export default ToastNotification;

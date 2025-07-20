@@ -1,10 +1,9 @@
 .hamburger-container {
   z-index: 20;
 }
-
 .hamburger-btn {
-  width: 36px;
-  height: 36px;
+  width: 46px;       /* increased from 36px */
+  height: 46px;      /* increased from 36px */
   position: relative;
   background: var(--panel-bg);
   border: none;
@@ -36,20 +35,20 @@
   transform: translateX(-50%);
 }
 
-/* Vertical positions */
+/* Vertical positions adjusted for taller button */
 .hamburger-btn .bar:nth-child(1) {
-  top: 8px;
+  top: 10px;  /* originally 8px */
 }
 .hamburger-btn .bar:nth-child(2) {
-  top: 16px;
+  top: 21px;  /* originally 16px */
 }
 .hamburger-btn .bar:nth-child(3) {
-  top: 24px;
+  top: 32px;  /* originally 24px */
 }
 
-/* Open state: form a perfect X */
+/* Open state: form a perfect X with new positions */
 .hamburger-btn.open .bar:nth-child(1) {
-  top: 16px; /* center bar vertical */
+  top: 23px; /* center bar vertical */
   transform: translateX(-50%) rotate(45deg);
 }
 
@@ -58,7 +57,7 @@
 }
 
 .hamburger-btn.open .bar:nth-child(3) {
-  top: 16px;
+  top: 23px;
   transform: translateX(-50%) rotate(-45deg);
 }
 
@@ -176,6 +175,28 @@
   outline: 2px solid var(--bright-accent);
   outline-offset: 2px;
 }
+
+.settings-btn {
+  background: var(--panel-bg);
+  border: none;
+  border-radius: 8px;
+  width: 46px;
+  height: 46px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  transition: background 0.2s;
+}
+
+.settings-btn:hover,
+.settings-btn:focus {
+  background: var(--bright-accent);
+  outline: none;
+}
+
 
 @media (max-width: 900px) {
   .hamburger-container {
