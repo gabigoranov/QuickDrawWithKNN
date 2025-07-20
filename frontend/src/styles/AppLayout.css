@@ -41,6 +41,14 @@ body {
   display: none;;
 }
 
+.centered-items{
+  flex-grow: 1;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Mobile: stacked layout */
 @media (max-width: 900px) {
   .hide-mobile {

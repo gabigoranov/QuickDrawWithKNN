@@ -211,6 +211,8 @@
   margin: 0 auto;
   position: absolute;
   top: 1rem;
+  width: 90%;
+  padding: 0 2rem;
 }
 
 /* Countdown timer with prominent styling */
@@ -226,6 +228,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 .countdown-value {

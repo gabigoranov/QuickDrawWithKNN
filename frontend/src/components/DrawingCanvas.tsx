@@ -16,6 +16,7 @@ interface Props {
   userHasDrawn: boolean;
   onUserDrawnChange: (hasDrawn: boolean) => void;
   className?: string;
+  isDrawingDisabled?: boolean;
 }
 
 type Point = { x: number; y: number };
@@ -31,7 +32,7 @@ const getRelativePos = (e: MouseEvent | TouchEvent, rect: DOMRect) => {
 };
 
 const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
-  ({ isCorrect, userHasDrawn, onUserDrawnChange, className }, ref) => {
+  ({ isCorrect, userHasDrawn, onUserDrawnChange, className, isDrawingDisabled }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawing = useRef(false);
     const hasDrawn = useRef(false);
@@ -83,7 +84,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
     }, [dpr, redraw]);
 
     const pointerDown = (e: React.MouseEvent | React.TouchEvent) => {
-      if (isCorrect) return;
+      if (isCorrect || isDrawingDisabled) return;
       isDrawing.current = true;
       const canvas = canvasRef.current!;
       const rect = canvas.getBoundingClientRect();
@@ -101,7 +102,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
     };
 
     const pointerMove = (e: React.MouseEvent | React.TouchEvent) => {
-      if (!isDrawing.current || isCorrect) return;
+      if (!isDrawing.current || isCorrect || isDrawingDisabled) return;
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
@@ -213,7 +214,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
         style={{
           background: "var(--background)",
           touchAction: "none",
-          cursor: isCorrect ? "not-allowed" : "crosshair",
+          cursor: isCorrect || isDrawingDisabled ? "not-allowed" : "crosshair",
+          opacity: isDrawingDisabled ? 0.5 : 1, // faded look when disabled
           display: "block",
           borderRadius: "1.5rem",
           userSelect: "none",

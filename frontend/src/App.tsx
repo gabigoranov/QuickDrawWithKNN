@@ -1,16 +1,100 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import DrawingCanvas, { type DrawingCanvasRef } from "./components/DrawingCanvas";
 import "./styles/AppLayout.css";
 import "./styles/CanvasPanel.css";
 import "./styles/InfoPanel.css";
 import "./styles/HamburgerMenu.css";
+import "./styles/ToastNotification.css"; // Ensure this includes styles for .toast-notification-container
 import Countdown from "./components/Countdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from '@fortawesome/free-solid-svg-icons'; 
-import { faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons'; 
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
 import HamburgerMenu from "./components/HamburgerMenu";
 
-function App() {
+// Import the new NotificationProvider and useNotifications hook
+import { NotificationProvider, useNotifications } from './components/NotificationContext';
+// Import your custom hook for fetching categories
+import { useCategoriesWithRetry } from './hooks/useCategoriesWithRetry'; // Adjust path if needed
+
+// Helper component to manage category loading notifications
+function CategoriesLoader({ setCategoriesFromHook }: { setCategoriesFromHook: (cats: string[]) => void }) {
+  const { categories, status, retryCountdown } = useCategoriesWithRetry("http://localhost:8000/categories", 5);
+  const { addNotification, removeNotification } = useNotifications();
+
+  const loadingNotificationId = useRef<string | null>(null);
+  const retryNotificationId = useRef<string | null>(null);
+
+  useEffect(() => {
+    // When loading starts, show loading notification
+    if (status === 'loading') {
+      // Only add once, or update if existing
+      if (!loadingNotificationId.current) {
+        loadingNotificationId.current = addNotification({
+          message: 'Loading categories...',
+          duration: undefined, // Persistent
+        });
+      }
+      // If retry notification was visible, remove it as we are now loading again
+      if (retryNotificationId.current) {
+        removeNotification(retryNotificationId.current);
+        retryNotificationId.current = null;
+      }
+    } else if (status === 'success') {
+      // Remove loading and retry notifications
+      if (loadingNotificationId.current) {
+        removeNotification(loadingNotificationId.current);
+        loadingNotificationId.current = null;
+      }
+      if (retryNotificationId.current) {
+        removeNotification(retryNotificationId.current);
+        retryNotificationId.current = null;
+      }
+      // Pass categories to parent App component
+      setCategoriesFromHook(categories);
+    } else if (status === 'error') {
+      // Remove loading notification if it was there
+      if (loadingNotificationId.current) {
+        removeNotification(loadingNotificationId.current);
+        loadingNotificationId.current = null;
+      }
+      // Show or update retry notification with countdown
+      if (!retryNotificationId.current) {
+        retryNotificationId.current = addNotification({
+          message: 'Failed to load categories.',
+          duration: undefined, // Persistent
+          data: { retryCountdown },
+        });
+      } else {
+        // If the retry notification already exists, we update it by re-adding.
+        // This is a simple way to update the children (countdown).
+        // A more advanced system might have an `updateNotification` method.
+        removeNotification(retryNotificationId.current); // Remove old one
+        retryNotificationId.current = addNotification({ // Add new one with updated data
+          message: 'Failed to load categories.',
+          duration: undefined,
+          data: { retryCountdown },
+        });
+      }
+    }
+
+    // Cleanup on unmount or status change to avoid memory leaks
+    return () => {
+      if (loadingNotificationId.current) {
+        removeNotification(loadingNotificationId.current);
+        loadingNotificationId.current = null;
+      }
+      if (retryNotificationId.current) {
+        removeNotification(retryNotificationId.current);
+        retryNotificationId.current = null;
+      }
+    };
+  }, [status, retryCountdown, categories, addNotification, removeNotification, setCategoriesFromHook]);
+
+  return null; // This component renders no UI itself
+}
+
+
+function AppContent() { // Renamed App to AppContent and wrapped by NotificationProvider below
   const canvasRef = useRef<DrawingCanvasRef>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [currentCategory, setCurrentCategory] = useState<string>("");
@@ -25,28 +109,43 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  const effectiveCountdownRunning = countdownRunning && !menuOpen && !isCorrect;
+  // Use the new notification system
+  const { addNotification } = useNotifications();
 
-  // Fetch categories once
-  useEffect(() => {
-    fetch("http://localhost:8000/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data.categories))
-      .catch(console.error);
+  // Function to set categories received from the CategoriesLoader
+  const handleSetCategories = useCallback((loadedCategories: string[]) => {
+    setCategories(loadedCategories);
   }, []);
+
+
+  const effectiveCountdownRunning = countdownRunning && !menuOpen && !isCorrect;
 
   // On categories loaded or reset, choose random category
   useEffect(() => {
     if (categories.length > 0) {
       selectRandomCategory();
     }
-    // eslint-disable-next-line
-  }, [categories]);
+  }, [categories]); // This effect now correctly depends on `categories` state
+
+  useEffect(() => {
+    if (menuOpen) {
+      addNotification({
+        message: "Drawing is disabled while the menu is open",
+        duration: 3000, // This notification will disappear after 3 seconds
+      });
+    }
+  }, [menuOpen, addNotification]);
 
   function selectRandomCategory() {
     setTimeRanOut(false);
     const source = selectedCategories.length ? selectedCategories : categories;
-    if (!source.length) return;
+    if (!source.length) {
+      addNotification({
+        message: "No categories available to draw from. Please check server.",
+        duration: 5000,
+      });
+      return;
+    }
 
     const available = source.filter(cat => !recentCategories.includes(cat));
     const pool = available.length > 0 ? available : source;
@@ -68,8 +167,6 @@ function App() {
     });
   }
 
-
-
   // Start countdown only after user has drawn something
   useEffect(() => {
     if (userHasDrawn && !isCorrect) {
@@ -90,7 +187,6 @@ function App() {
     return () => clearInterval(interval);
   }, [effectiveCountdownRunning, userHasDrawn, currentCategory]);
 
-
   async function pollPrediction() {
     if (!userHasDrawn || !canvasRef.current) return;
     try {
@@ -109,51 +205,59 @@ function App() {
       }
     } catch (e) {
       console.error("Prediction error:", e);
+      addNotification({
+        message: "Prediction service error. Please try again later.",
+        duration: 5000,
+      });
     }
   }
 
   function handleClear() {
     canvasRef.current?.clearCanvas();
+    setUserHasDrawn(false); // Reset userHasDrawn on clear
   }
 
   return (
     <div className="app-layout">
-      <main className="canvas-panel" aria-label="Drawing Canvas Area">
-        <HamburgerMenu
-          categories={categories}
-          selectedCategories={selectedCategories}
-          setSelectedCategories={setSelectedCategories}
-          isOpen={menuOpen}
-          setIsOpen={setMenuOpen}
-        />
+      {/* CategoriesLoader ensures categories are fetched and notifications are handled */}
+      <CategoriesLoader setCategoriesFromHook={handleSetCategories} />
 
+      <main className="canvas-panel" aria-label="Drawing Canvas Area">
         <DrawingCanvas
           ref={canvasRef}
           isCorrect={isCorrect}
           userHasDrawn={userHasDrawn}
           onUserDrawnChange={setUserHasDrawn}
           className="drawing-canvas"
+          isDrawingDisabled={menuOpen}
         />
 
         {/* Positioned items */}
         <div className="category-prompt-container">
-          <h1 className="category-prompt info-container">
-            {!isCorrect && <><span className="hide-mobile">Draw this: </span><b>{currentCategory}</b></>}
-          </h1>
-
-          <Countdown
-            duration={30}
-            onComplete={() => {
-              if (!isCorrect) setTimeRanOut(true);
-            }}
-            running={effectiveCountdownRunning}
-            resetTrigger={resetKey}
+          <HamburgerMenu
+            categories={categories} // Use the categories from state
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            isOpen={menuOpen}
+            setIsOpen={setMenuOpen}
           />
+          <div className="centered-items">
+            <h1 className="category-prompt info-container">
+              {!isCorrect && <><span className="hide-mobile">Draw this: </span><b>{currentCategory}</b></>}
+            </h1>
 
+            <Countdown
+              duration={30}
+              onComplete={() => {
+                if (!isCorrect) setTimeRanOut(true);
+              }}
+              running={effectiveCountdownRunning}
+              resetTrigger={resetKey}
+            />
+          </div>
         </div>
 
         <div className="actions">
-          
           <button
             className="clear-btn info-container"
             onClick={handleClear}
@@ -194,8 +298,8 @@ function App() {
             You didn't draw a <b>{currentCategory}</b> in time!
             <br />
             <button onClick={() => {
-                selectRandomCategory();
-              }} autoFocus>
+              selectRandomCategory();
+            }} autoFocus>
               Try again
             </button>
           </div>
@@ -205,4 +309,11 @@ function App() {
   );
 }
 
-export default App;
+// Main App component that wraps the content with the NotificationProvider
+export default function App() {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
+  );
+}

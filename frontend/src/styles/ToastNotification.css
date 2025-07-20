@@ -1,0 +1,121 @@
+.toast-notification {
+  max-width: 300px;
+  background: var(--panel-bg);
+  color: var(--text-light);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(34, 37, 59, 0.3);
+  font-weight: 600;
+  font-size: 1rem;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  gap: 0.2rem;
+}
+
+/* Slide in */
+.toast-notification.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Progress bar at bottom */
+.toast-progress {
+  height: 4px;
+  background: var(--bright-accent);
+  border-radius: 3px;
+  width: 100%; /* will be overridden inline */
+  transition: width 0.1s linear;
+}
+
+.toast-extra button {
+  background-color: var(--accent);
+  color: var(--text-light);
+  border: none;
+  padding: 0.4em 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.25s ease;
+  user-select: none;
+}
+
+.toast-extra button:hover,
+.toast-extra button:focus-visible {
+  background-color: var(--bright-accent);
+  outline: none;
+}
+
+/* Add this to your ToastNotification.css */
+.toast-notification-container {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between stacked notifications */
+  max-width: 320px; /* Limit width */
+}
+
+.toast-notification {
+  background: var(--panel-bg);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  user-select: none;
+  min-width: 200px; /* Minimum width for toasts */
+  opacity: 0; /* Start hidden */
+  transform: translateX(100%); /* Start off-screen to the right */
+  animation: slideIn 0.3s forwards; /* Animation for sliding in */
+}
+
+/* Animation for sliding in */
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Style for the progress bar */
+.toast-progress {
+  height: 3px;
+  background-color: var(--accent);
+  margin-top: 8px;
+  border-radius: 1.5px;
+}
+
+.toast-message {
+  font-weight: bold;
+}
+
+.toast-extra {
+  font-size: 0.85em;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+@keyframes shrink-width {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+@media (max-width: 900px) {
+    .toast-notification{
+        top: auto;
+        bottom: 4rem;
+    }
+}
