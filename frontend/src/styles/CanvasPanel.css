@@ -25,21 +25,6 @@
   touch-action: none;
 }
 
-.drawing-disabled-overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(45, 45, 65, 0.5);
-  color: var(--text-light);
-  font-size: 1.3rem;
-  font-weight: bold;
-  pointer-events: auto; /* Ensures overlay blocks pointer events */
-  border-radius: 1.5rem;
-}
-
 @media (max-width: 900px) {
   .drawing-canvas {
     height: 100%;

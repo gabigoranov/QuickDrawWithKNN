@@ -74,13 +74,13 @@ html, body, #root {
   background-color: var(--accent);
   outline: none;
   box-shadow: 0 0 10px var(--bright-accent);
-  color: white;
+  color: var(--background);
 }
 
 .sidebar-tab.active {
   background-color: var(--bright-accent);
   box-shadow: 0 0 15px var(--bright-accent);
-  color: white;
+  color: var(--background);
   cursor: default;
   font-weight: 700;
 }
@@ -88,7 +88,7 @@ html, body, #root {
 /* Content area */
 .settings-content {
   flex-grow: 1;
-  background: white;
+  background: var(--background);
   padding: 2rem 3rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -110,5 +110,12 @@ html, body, #root {
   background-color: var(--bright-accent);
   border-radius: 8px;
 }
+
+.sidebar-footer {
+  display: flex;
+  justify-content: center;
+}
+
+
 
 /* Scrollbar handles vertical scrolling only */

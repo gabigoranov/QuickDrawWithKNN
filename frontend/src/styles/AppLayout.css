@@ -1,4 +1,5 @@
 :root {
+  /* light theme vars (your current ones) */
   --background: #f5f7fa;
   --panel-bg: #a7a5c6;
   --canvas-bg: #fff;
@@ -9,9 +10,32 @@
   --border: #8797b2;
   --bright-accent: #7bdddb;
   --shadow-color: rgba(34, 37, 59, 0.15);
+  --accent-shadow-color: #5da7b5;
+  
 
   box-sizing: border-box;
 }
+
+[data-theme="dark"] {
+  --background: #121212;
+  --panel-bg: #3c3c4c;
+  --canvas-bg: #222;
+  --surface: #6a6a7a;
+  --text: #eaeaea;
+  --text-light: #ccc;
+  --accent: #66ced6;
+  --border: #525252;
+  --bright-accent: #7bdddb;
+  --shadow-color: rgba(0, 0, 0, 0.7);
+  --accent-shadow-color: #5da7b5;
+}
+
+.row{
+  display: flex;
+  gap: 1rem;
+}
+
+/* rest of your CSS... */
 
 html, body, #root {
   height: 100%;

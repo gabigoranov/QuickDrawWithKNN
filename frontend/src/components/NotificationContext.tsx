@@ -1,18 +1,18 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import ToastNotification from './ToastNotification'; // Assuming ToastNotification is in the same components folder
+import ToastNotification from './ToastNotification';
 
 export interface Notification {
   id: string;
   message: string;
-  duration?: number; // auto-dismiss in ms, omit for persistent
+  duration?: number;
   onClose?: () => void;
-  data?: any; // optional extra data for UI, e.g., retryCountdown
+  data?: any;
 }
 
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'id'>) => string; // returns generated ID
-  removeNotification: (id: string) => void;
+  addNotification: (notification: Omit<Notification, 'id'>) => string;
+  removeNotification: (id: string) => void;  // <- add removeNotification here
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -27,13 +27,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter(n => n.id !== id));
+    setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
   return (
     <NotificationContext.Provider value={{ notifications, addNotification, removeNotification }}>
       {children}
-      <div className="toast-notification-container"> {/* This is the container for stacked toasts */}
+      <div className="toast-notification-container">
         {notifications.map(({ id, message, duration, onClose, data }) => (
           <ToastNotification
             key={id}
@@ -44,10 +44,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               if (onClose) onClose();
             }}
           >
-            {/* Render retry countdown if data.retryCountdown exists */}
-            {data?.retryCountdown !== undefined && (
-              <div className="toast-extra">Retrying in {data.retryCountdown}s...</div>
-            )}
+            {data?.retryCountdown !== undefined && <div className="toast-extra">Retrying in {data.retryCountdown}s...</div>}
           </ToastNotification>
         ))}
       </div>
@@ -57,7 +54,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
 export function useNotifications() {
   const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotifications must be used inside NotificationProvider');
+  if (!context) {
+    throw new Error('useNotifications must be used inside NotificationProvider');
+  }
   return context;
 }
-
