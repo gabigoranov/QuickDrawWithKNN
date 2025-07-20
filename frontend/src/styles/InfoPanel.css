@@ -92,7 +92,8 @@
   gap: 0.5rem;
   width: auto;
   align-items: stretch;
-  justify-content: center;;
+  justify-content: center;
+  padding: 0rem 2rem;
 }
 
 /* Buttons */
@@ -126,6 +127,23 @@
   box-shadow:
     inset 0 -3px 0 #4599a0,
     0 4px 12px var(--shadow-color);
+}
+
+.undo-btn {
+  padding: 0.85rem 1.8rem;
+  font-size: 1.15rem;
+  color: var(--text);
+  border-radius: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: none;
+  background: #ddd;
+  color: #999;
+  cursor: not-allowed;
+
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
 }
 
 .animated-popup {
@@ -247,5 +265,10 @@ b {
 @media (max-width: 900px) {
   .actions {
     width: 100%;
+  }
+
+  .prediction {
+    position: fixed;
+    top: 5rem;
   }
 }

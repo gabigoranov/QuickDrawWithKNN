@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import ToastNotification from './ToastNotification'; // Assuming ToastNotification is in the same components folder
 
 export interface Notification {

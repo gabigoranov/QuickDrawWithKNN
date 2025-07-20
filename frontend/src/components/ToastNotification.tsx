@@ -13,7 +13,7 @@ export default function ToastNotification({
   onClose,
   children,
 }: ToastNotificationProps) {
-  const [timeLeft, setTimeLeft] = useState(duration || 0);
+  const [, setTimeLeft] = useState(duration || 0);
   const startTimeRef = useRef<number | null>(null);
   const animationFrame = useRef<number | null>(null);
 

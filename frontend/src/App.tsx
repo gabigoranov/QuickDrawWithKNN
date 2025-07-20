@@ -9,6 +9,7 @@ import Countdown from "./components/Countdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { faArrowRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import HamburgerMenu from "./components/HamburgerMenu";
 
 // Import the new NotificationProvider and useNotifications hook
@@ -191,6 +192,7 @@ function AppContent() { // Renamed App to AppContent and wrapped by Notification
     if (!userHasDrawn || !canvasRef.current) return;
     try {
       const strokes = canvasRef.current.getStrokes();
+      console.log(strokes)
       const res = await fetch("http://localhost:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -267,13 +269,31 @@ function AppContent() { // Renamed App to AppContent and wrapped by Notification
             <span className="hide-mobile">Clear</span><span className="show-mobile"><FontAwesomeIcon icon={faTrash} size="2x" color="#FFFFFF" /></span>
           </button>
           <button className="tryagain-btn info-container" onClick={selectRandomCategory}>
-            <span className="hide-mobile">Try Again</span><span className="show-mobile"><FontAwesomeIcon icon={faArrowRotateLeft} size="2x" color="#FFFFFF" /></span>
+            <span className="hide-mobile">Try Again</span><span className="show-mobile"><FontAwesomeIcon icon={faPlus} size="2x" color="#FFFFFF" /></span>
           </button>
           {prediction && !isCorrect && (
             <div className="prediction info-container">
               <span className="hide-mobile">Prediction: </span><b>{prediction}</b>
             </div>
           )}
+          <button
+            className="undo-btn info-container"
+            onClick={() => {
+              canvasRef.current?.undoLastStroke();
+              setUserHasDrawn(
+                (prev) => {
+                  // Check if after undo there are no strokes
+                  const strokes = canvasRef.current?.getStrokes() || [];
+                  return strokes.length > 0 ? true : false;
+                }
+              );
+            }}
+            disabled={!userHasDrawn}
+            aria-disabled={!userHasDrawn}
+          >
+            <span className="hide-mobile">Undo</span>
+            <span className="show-mobile"><FontAwesomeIcon icon={faArrowRotateLeft} size="2x" color="#FFFFFF" /></span>
+          </button>
         </div>
       </main>
       {showPopup && (

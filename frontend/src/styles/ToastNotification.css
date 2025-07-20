@@ -54,7 +54,7 @@
 /* Add this to your ToastNotification.css */
 .toast-notification-container {
   position: fixed;
-  top: 2rem;
+  top: 6rem;
   right: 2rem;
   z-index: 9999;
   display: flex;

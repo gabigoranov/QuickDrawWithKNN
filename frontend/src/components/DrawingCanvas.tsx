@@ -9,6 +9,7 @@ import React, {
 export type DrawingCanvasRef = {
   getStrokes: () => [number[], number[]][];
   clearCanvas: () => void;
+  undoLastStroke: () => void;
 };
 
 interface Props {
@@ -32,7 +33,7 @@ const getRelativePos = (e: MouseEvent | TouchEvent, rect: DOMRect) => {
 };
 
 const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
-  ({ isCorrect, userHasDrawn, onUserDrawnChange, className, isDrawingDisabled }, ref) => {
+  ({ isCorrect, onUserDrawnChange, className, isDrawingDisabled }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const isDrawing = useRef(false);
     const hasDrawn = useRef(false);
@@ -158,6 +159,17 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
       onUserDrawnChange(false);
     };
 
+    const undoLastStroke = useCallback(() => {
+      if (strokesRef.current.length === 0) return;
+      strokesRef.current.pop();
+      redraw();
+
+      if (strokesRef.current.length === 0) {
+        hasDrawn.current = false;
+        onUserDrawnChange(false);
+      }
+    }, [redraw, onUserDrawnChange]);  
+
     const getStrokes = (): [number[], number[]][] => {
       return strokesRef.current
         .filter((stroke) => stroke.length > 1)
@@ -167,6 +179,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, Props>(
     useImperativeHandle(ref, () => ({
       getStrokes,
       clearCanvas,
+      undoLastStroke,
     }));
 
     useEffect(() => {
