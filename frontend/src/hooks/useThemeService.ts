@@ -1,10 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useCookie } from "./useCookie";
 
 type Theme = "auto" | "light" | "dark";
 
 export default function useThemeService(): [Theme, (t: Theme) => void] {
   const [theme, setTheme] = useCookie<Theme>("setting_theme", "auto", { days: 365 });
+
+  useLayoutEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const systemPrefersDark = mediaQuery.matches;
+    applyTheme(theme, systemPrefersDark);
+
+    const listener = (e: MediaQueryListEvent) => {
+      if (theme === "auto") {
+        applyTheme(theme, e.matches);
+      }
+    };
+
+    mediaQuery.addEventListener("change", listener);
+
+    return () => mediaQuery.removeEventListener("change", listener);
+  }, [theme]);
 
   // Function to update CSS variables to default light or dark mode
   const applyTheme = (themeToApply: Theme, systemPrefersDark: boolean) => {

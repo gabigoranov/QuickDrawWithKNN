@@ -52,6 +52,9 @@ html, body, #root {
   margin: 0;
   padding: 0;
   flex-grow: 1;
+  display: flex;
+  flex-flow: column;
+  gap: 0.5rem;
 }
 
 /* Individual tab buttons */

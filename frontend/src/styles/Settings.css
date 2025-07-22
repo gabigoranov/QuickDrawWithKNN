@@ -374,10 +374,11 @@ body, html {
   color: #de4343;
   font-weight: 700;
   margin-bottom: 1.2rem;
-  background: #fff3f3;
+  background: var(--background);
   border-radius: 8px;
   padding: 0.8rem 1rem;
   text-align: left;
+  box-shadow: 0 2px 24px 0 rgba(40, 60, 120, 0.08), 0 1.5px 10px 0 rgba(60, 0, 180, 0.04);
 }
 
 
@@ -407,4 +408,11 @@ body, html {
 .sidebar-back-button:focus-visible {
   outline: 2px solid var(--bright-accent);
   outline-offset: 2px;
+}
+
+.settings-error button {
+  border: none;
+  border-radius: 8px;
+  background-color: var(--accent);
+  padding: 0.4rem 0.6rem;
 }
