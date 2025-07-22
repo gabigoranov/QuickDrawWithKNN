@@ -9,6 +9,7 @@ import SettingsButton from "../components/SettingsButton";
 import { useCategoryService } from "../services/categoryService";
 
 import { toast, type ToastReturnType } from "../context/ToastContext";
+import { useCookie } from "../hooks/useCookie";
 
 export default function AppContent() {
   const canvasRef = useRef<DrawingCanvasRef>(null);
@@ -34,6 +35,8 @@ export default function AppContent() {
   const loadingCategoriesErrorToast = useRef<ToastReturnType | null>(null);
   const predictionErrorToast = useRef<ToastReturnType | null>(null);
   const noCategoriesErrorToast = useRef<ToastReturnType | null>(null);
+
+  const [countdownDurtaion] = useCookie<number>("countdown_duration", 30);
 
   const effectiveCountdownRunning = countdownRunning && !isCorrect;
 
@@ -200,7 +203,7 @@ useEffect(() => {
             </h1>
 
             <Countdown
-              duration={30}
+              duration={countdownDurtaion}
               onComplete={() => {
                 if (!isCorrect) setTimeRanOut(true);
               }}

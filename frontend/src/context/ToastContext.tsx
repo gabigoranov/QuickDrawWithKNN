@@ -7,6 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import ToastContainer from "../components/ToastContainer";
+import { useCookie } from "../hooks/useCookie";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -35,8 +36,10 @@ const ToastContext = createContext<ToastContextProps | undefined>(undefined);
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
+  const [notificationsEnabled] = useCookie<boolean>("notifications_enabled", true);
+  
   const addToast = useCallback((toast: Omit<Toast, "id">) => {
+    if(!notificationsEnabled) return "";
     const id = crypto.randomUUID();
     setToasts((curr) => [...curr, { ...toast, id }]);
     return id;

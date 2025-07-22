@@ -5,7 +5,7 @@ export default function NotificationSettings() {
   // If you only have sound, then "notifications_sound" is fine as is.
   // If you have other types of notifications, maybe rename this cookie to "notifications_enabled"
   const [notificationsEnabled, setNotificationsEnabled] = useCookie<boolean>(
-    "notifications_sound", // or "notifications_enabled" if more general
+    "notifications_enabled", // or "notifications_enabled" if more general
     true,
     { days: 365 }
   );
