@@ -119,6 +119,17 @@ html, body, #root {
   justify-content: center;
 }
 
+@media (max-width: 900px) {
+  .settings-fullscreen{
+    display: flex;
+    flex-flow: column;
+  } 
+
+  .settings-sidebar{
+    width: 100%;
+    padding-bottom: 0;
+  }
+}
 
 
 /* Scrollbar handles vertical scrolling only */

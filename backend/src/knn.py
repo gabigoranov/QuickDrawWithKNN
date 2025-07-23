@@ -4,6 +4,8 @@ from collections import defaultdict
 from sklearn.model_selection import KFold
 import matplotlib.pyplot as plt
 from sklearn.neighbors import BallTree
+from common.distance_metrics import DistanceMetric
+from common.indexing_structures import IndexingStructure
 from utils import timeit
 from sklearn.neighbors import KDTree
 import cupy as cp
@@ -24,8 +26,18 @@ class KNN:
         self.training_features = None
         self.training_labels = None
         self.best_k = best_k
-        self.ball_tree = None
+        self.ball_trees = {}
         self.kd_tree = None
+
+    def adaptive_prediction(self, test_point, k = 5, metric=DistanceMetric.EUCLIDEAN, indexing=IndexingStructure.KD_TREE):
+        matches = {
+            IndexingStructure.KD_TREE: lambda: self.predict_with_kd_tree_weighted(test_point=test_point, k=k, metric=metric),
+            IndexingStructure.BALL_TREE: lambda: self.predict_with_ball_tree_weighted(test_point=test_point, k=k, metric=metric),
+            IndexingStructure.BRUTE_FORCE: lambda: self.predict_weighted(test_point=test_point, k=k, metric=metric),
+        }
+
+        indexing_enum = IndexingStructure(indexing)
+        return matches[indexing_enum]()
 
     @timeit
     def eucledean_distances_fast(self, test_point):
@@ -41,7 +53,7 @@ class KNN:
         return np.linalg.norm(self.training_features - test_point, axis=1)
 
     @timeit
-    def predict_weighted(self, test_point, k=None, epsilon=1e-5):
+    def predict_weighted(self, test_point, k=None, epsilon=1e-5, metric=DistanceMetric.EUCLIDEAN):
         """
         Predicts the label for a single test point using weighted KNN.
 
@@ -56,7 +68,13 @@ class KNN:
         if k is None:
             k = self.best_k
 
-        dists = self.eucledean_distances_fast(test_point=test_point)
+        if metric == DistanceMetric.EUCLIDEAN:
+            dists = np.linalg.norm(self.training_features - test_point, axis=1)
+        elif metric == DistanceMetric.MANHATTAN:
+            dists = np.sum(np.abs(self.training_features - test_point), axis=1)
+        else:
+            raise ValueError(f"Unsupported distance metric: {metric}")
+        
         knn_indices = np.argsort(dists)[:k]
 
         weights = defaultdict(float)
@@ -72,7 +90,7 @@ class KNN:
         """
         Predicts labels for a batch of test points using weighted K-Nearest Neighbors.
 
-        For each test point, the method computes Euclidean distances to all training points,
+        For each test point, the method computes EUCLIDEAN distances to all training points,
         finds the `k` closest neighbors, and performs weighted voting based on the inverse
         of distances to determine the predicted label.
 
@@ -165,7 +183,7 @@ class KNN:
             end = min(start + batch_size, len(testing_points))
             X_batch = testing_points[start:end]
 
-            # Euclidean distance on GPU
+            # EUCLIDEAN distance on GPU
             dists = cp.sqrt(cp.sum((X_batch[:, cp.newaxis, :] - X_train[cp.newaxis, :, :]) ** 2, axis=2))
 
             # Get top k indices
@@ -187,7 +205,7 @@ class KNN:
         return np.array(predictions)
     
     @timeit
-    def predict_with_ball_tree_weighted(self, test_point: np.ndarray, k=None, epsilon=1e-5):
+    def predict_with_ball_tree_weighted(self, test_point: np.ndarray, k=None, epsilon=1e-5, metric=DistanceMetric.EUCLIDEAN):
         """
         Predicts the label using a Ball Tree-based weighted KNN.
 
@@ -202,8 +220,11 @@ class KNN:
         if k is None:
             k = self.best_k
 
+        if metric not in [DistanceMetric.EUCLIDEAN, DistanceMetric.MANHATTAN]:
+            raise ValueError(f"BallTree only supports EUCLIDEAN and MANHATTAN distances, got {metric}.")
+
         # Query BallTree for k nearest neighbors
-        dists, indices = self.ball_tree.query(test_point.reshape(1, -1), k=k)
+        dists, indices = self.ball_trees[metric].query(test_point.reshape(1, -1), k=k)
         dists = dists.flatten()
         indices = indices.flatten()
 
@@ -254,7 +275,7 @@ class KNN:
         return np.array(predictions)
     
     @timeit
-    def predict_with_kd_tree_weighted(self, test_point: np.ndarray, k=None, epsilon=1e-5):
+    def predict_with_kd_tree_weighted(self, test_point: np.ndarray, k=None, epsilon=1e-5, metric=DistanceMetric.EUCLIDEAN):
         """
         Predicts the label using a KD Tree-based weighted KNN.
 
@@ -266,6 +287,9 @@ class KNN:
         Returns:
         - Predicted label.
         """
+        if metric != DistanceMetric.EUCLIDEAN:
+            raise ValueError(f"KD_Tree only supports the EUCLIDEAN distance metric, got {metric.value}")
+
         if k is None:
             k = self.best_k
 
@@ -320,7 +344,7 @@ class KNN:
 
 
 
-    def fit(self, features, labels, k=3, metric="euclidean"):
+    def fit(self, features, labels, k=3, metric=DistanceMetric.EUCLIDEAN):
         """
         Stores the training data and builds internal search structures (BallTree/KDTree) 
         for the KNN classifier.
@@ -331,14 +355,14 @@ class KNN:
         - labels (array-like): A 1D array of shape (n_samples,) representing class labels.
         - k (int, optional): Number of neighbors to consider (default: 3).
         - metric (str, optional): Distance metric to use. Supported values for BallTree include:
-            - 'euclidean' (L2)
+            - 'EUCLIDEAN' (L2)
             - 'manhattan' (L1)
             - 'chebyshev'
             - 'minkowski'
             - 'hamming'
             - 'cosine'
             - etc.
-        Note: KDTree only supports 'euclidean'.
+        Note: KDTree only supports 'EUCLIDEAN'.
 
         Raises:
         - ValueError: If inputs are invalid or mismatched in shape.
@@ -364,10 +388,11 @@ class KNN:
         self.best_k = k
 
         # Create BallTree with chosen metric
-        self.ball_tree = BallTree(self.training_features, metric=metric)
+        self.ball_trees[DistanceMetric.EUCLIDEAN] = BallTree(self.training_features, metric=DistanceMetric.EUCLIDEAN.value)
+        self.ball_trees[DistanceMetric.MANHATTAN] = BallTree(self.training_features, metric=DistanceMetric.MANHATTAN.value)
 
-        # Only build KDTree if metric is 'euclidean'
-        if metric == "euclidean":
+        # Only build KDTree if metric is 'EUCLIDEAN'
+        if metric == DistanceMetric.EUCLIDEAN:
             self.kd_tree = KDTree(self.training_features)
         else:
             self.kd_tree = None
@@ -458,7 +483,7 @@ class KNN:
         return np.array(predictions)
 
     @classmethod
-    def from_data(cls, features, labels, k=3, metric="euclidean"):
+    def from_data(cls, features, labels, k=3, metric="EUCLIDEAN"):
         """
         Factory method to create and fit a KNN instance.
 

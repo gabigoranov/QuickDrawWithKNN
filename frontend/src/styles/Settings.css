@@ -416,3 +416,162 @@ body, html {
   background-color: var(--accent);
   padding: 0.4rem 0.6rem;
 }
+
+/* Number input with min/max and step styling (reuses .settings-input) */
+.settings-input[type="number"] {
+  width: 60px;
+  min-width: 60px;
+  padding: 0.36rem 0.6rem;
+  text-align: center;
+}
+
+/* Range slider styling - matches site style */
+.settings-slider {
+  width: 180px;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  margin-bottom: 0.25rem;
+  accent-color: var(--accent);
+  border-radius: 8px;
+  height: 8px;
+  -webkit-appearance: none;
+  background: var(--background);
+  border: 1.5px solid var(--accent);
+  transition: border 0.2s;
+}
+
+.settings-slider:hover,
+.settings-slider:focus {
+  border-color: var(--bright-accent);
+  outline: none;
+  box-shadow: 0 0 6px var(--bright-accent);
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid var(--bright-accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s, border-color 0.2s;
+  margin-top: -5px; /* center thumb */
+}
+.settings-slider::-webkit-slider-thumb:hover,
+.settings-slider::-webkit-slider-thumb:focus {
+  background: var(--bright-accent);
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Firefox */
+.settings-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid var(--bright-accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s, border-color 0.2s;
+}
+.settings-slider::-moz-range-thumb:hover,
+.settings-slider::-moz-range-thumb:focus {
+  background: var(--bright-accent);
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Checkbox input common styling */
+.settings-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  border-radius: 4px;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+  border: 1.5px solid var(--accent);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.settings-checkbox:hover,
+.settings-checkbox:focus {
+  border-color: var(--bright-accent);
+  outline: none;
+  box-shadow: 0 0 6px var(--bright-accent);
+}
+
+/* Button styles */
+.settings-button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background-color 0.25s, box-shadow 0.23s;
+  user-select: none;
+  min-width: 190px;
+}
+
+.settings-button.primary {
+  background-color: var(--accent);
+  color: var(--text-light);
+  box-shadow: 0 3px 8px var(--shadow-color);
+}
+
+.settings-button.primary:hover,
+.settings-button.primary:focus-visible {
+  background-color: var(--bright-accent);
+  outline: none;
+  box-shadow: 0 6px 14px var(--bright-accent);
+}
+
+.settings-button.secondary {
+  background-color: var(--background);
+  color: var(--accent);
+  border: 1.7px solid var(--accent);
+  box-shadow: none;
+}
+
+.settings-button.secondary:hover,
+.settings-button.secondary:focus-visible {
+  background-color: var(--accent);
+  color: var(--text-light);
+  outline: none;
+  box-shadow: 0 3px 7px var(--accent);
+}
+
+/* Container for button group with gap */
+.settings-form-row > .settings-button {
+  margin-right: 1rem;
+}
+
+.settings-form-row > .settings-button:last-child {
+  margin-right: 0;
+}
+
+/* Responsive fixes for slider + number inputs inline */
+@media (min-width: 450px) {
+  .settings-form-row input[type="range"] {
+    vertical-align: middle;
+  }
+  .settings-form-row input[type="number"] {
+    vertical-align: middle;
+    margin-left: 0.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .settings-input{
+    min-width: 90%;
+  }
+
+  .settings-form-row{
+    padding: 0;
+  }
+}

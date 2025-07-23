@@ -9,12 +9,14 @@ import '../styles/Settings.css';
 import '../styles/SettingsTabs.css';
 import '../styles/HamburgerMenu.css';
 import { useCategoryService } from "../services/categoryService";
+import AdvancedSettings from "../components/AdvancedSettings";
 
 const tabs = [
   { id: "general", label: "General" },
   { id: "categories", label: "Categories" },
   { id: "notifications", label: "Notifications" },
   { id: "countdown", label: "Countdown" },
+  { id: "advanced", label: "Advanced" },
 ];
 
 export default function Settings() {
@@ -51,7 +53,8 @@ export default function Settings() {
         return <NotificationSettings />;
       case "countdown":
         return <CountdownSettings />;
-      case "accessibility":
+      case "advanced":
+        return <AdvancedSettings />
       default:
         return null;
     }

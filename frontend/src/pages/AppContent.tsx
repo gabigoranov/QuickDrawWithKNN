@@ -10,6 +10,7 @@ import { useCategoryService } from "../services/categoryService";
 
 import { toast, type ToastReturnType } from "../context/ToastContext";
 import { useCookie } from "../hooks/useCookie";
+import { ADVANCED_DEFAULTS, type AdvancedSettingsState } from "../components/AdvancedSettings";
 
 export default function AppContent() {
   const canvasRef = useRef<DrawingCanvasRef>(null);
@@ -40,9 +41,11 @@ export default function AppContent() {
 
   const effectiveCountdownRunning = countdownRunning && !isCorrect;
 
-  useEffect(() => {
-  console.log("userHasDrawn:", userHasDrawn);
-}, [userHasDrawn]);
+  const [advancedSettings] = useCookie<AdvancedSettingsState>(
+    "advancedSettings",
+    ADVANCED_DEFAULTS,
+    { days: 30 }
+  );
 
 useEffect(() => {
   if (status === "loading" || status === "success") {
@@ -110,13 +113,14 @@ useEffect(() => {
   }, [effectiveCountdownRunning, userHasDrawn, currentCategory]);
 
   async function pollPrediction() {
+    console.log(advancedSettings);
     if (!userHasDrawn || !canvasRef.current) return;
     try {
       const strokes = canvasRef.current.getStrokes();
       const res = await fetch("http://localhost:8000/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ strokes }),
+        body: JSON.stringify({ strokes: strokes, k: advancedSettings.k, metric: advancedSettings.distanceMetric, indexing: advancedSettings.indexAlgorithm }),
       });
       const data = await res.json();
       setPrediction(data.prediction);
@@ -133,7 +137,7 @@ useEffect(() => {
       console.error("Prediction error:", e);
 
       if(!predictionErrorToast.current) {
-        predictionErrorToast.current = toast("Prediction service error. Please try again later.", "error", 0);
+        predictionErrorToast.current = toast("Prediction service error. Please try again later.", "error", 3000);
       }
     }
   }

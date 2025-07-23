@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import joblib
+from common.distance_metrics import DistanceMetric
 from utils import create_dataset, get_data, draw_image, display_vector_drawing
 from sklearn.model_selection import train_test_split
 from preprocessor import Preprocessor
@@ -144,19 +145,19 @@ if os.path.exists(model_cache_path):
     model = joblib.load(model_cache_path)
     print("Loaded cached KNN model.")
 else:
-    model = KNN.from_data(X_train, y_train, 5, metric="euclidean")
+    model = KNN.from_data(X_train, y_train, 5, metric=DistanceMetric.EUCLIDEAN)
     joblib.dump(model, model_cache_path)
     print("Saved KNN model to cache.")
 
 
 
-evaluator = Evaluator()
+# evaluator = Evaluator()
 
 #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-y_pred = KNN.from_data(X_train, y_train, k=7).predict_with_kd_tree_weighted_batch(X_test, batch_size=100)
+#y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=100)
 
-evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
+# evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
 # from app import DrawingApp
 

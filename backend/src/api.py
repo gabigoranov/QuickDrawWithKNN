@@ -9,6 +9,8 @@ import base64
 from PIL import Image
 import io
 import matplotlib.pyplot as plt
+from common.indexing_structures import IndexingStructure
+from common.distance_metrics import DistanceMetric
 from utils import draw_image
 from config import CACHE_DIR
 
@@ -44,7 +46,10 @@ preprocessor = joblib.load(preprocessor_path)
 SHOW_PREPROCESSED_IMAGE = False
 
 class StrokeRequest(BaseModel):
-    strokes: List[List[List[float]]]
+    strokes: List[List[List[float]]];
+    k: int = 5;
+    metric: DistanceMetric = DistanceMetric.EUCLIDEAN;
+    indexing: str = IndexingStructure.KD_TREE;
 
 
 @app.post("/predict")
@@ -64,7 +69,7 @@ def predict(req: StrokeRequest):
     # 3. Normalize and predict
     arr = arr / 1.0  # already normalized by draw_image to [0,1]
     processed = preprocessor.transform(arr)
-    prediction = model.predict_weighted(processed, k=5)
+    prediction = model.adaptive_prediction(test_point=processed, k=req.k, metric=req.metric, indexing=req.indexing,)
 
     return {"prediction": str(prediction)}
 

@@ -1,14 +1,5 @@
 import { useRef } from "react";
-import { useCookie } from "../hooks/useCookie";
 import useThemeService from "../hooks/useThemeService";
-
-const languages = [
-  { label: "English", value: "en" },
-  { label: "Español", value: "es" },
-  { label: "Français", value: "fr" },
-  { label: "Deutsch", value: "de" },
-  // ...add as needed
-];
 
 export default function GeneralSettings() {
   const [theme, setTheme] = useThemeService();
