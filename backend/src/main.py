@@ -153,9 +153,9 @@ else:
 
 # evaluator = Evaluator()
 
-#evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
+# #evaluator.cross_validate(X=X_train, y=y_train, k_range=range(1,10))
 
-#y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=100)
+# y_pred = KNN.from_data(X_train, y_train, k=5).predict_with_kd_tree_weighted_batch(X_test, batch_size=100)
 
 # evaluator.print_classification_report(y_pred=y_pred, y_true=y_test)
 
